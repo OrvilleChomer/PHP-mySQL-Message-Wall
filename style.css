@@ -1,0 +1,739 @@
+body {
+	margin:0;
+	padding:0;
+	background-color:#E9EBEE;
+	box-sizing: border-box;
+	overflow:hidden;
+	font-family:Helvetica Neue, Helvetica, Arial, sans-serif;
+}
+
+a {
+	color:#375a97;
+}
+
+a:VISITED {
+	color:#375a97;
+}
+
+#pgHdr {
+	position:absolute;
+	top:0; left:0;
+	height:42px;
+	background-color:orange;
+}
+
+#msgWallLogo {
+	width:35px;
+	height:35px;
+	position:absolute;
+	top:3px;
+	border-radius:3px;
+}
+
+#siteTitle {
+	position:absolute;
+	top:6px;
+	font-size:19pt;
+}
+
+
+#viewPort {
+	position:absolute;
+	top:42px; 
+	left:0px;
+	overflow:hidden;
+}
+
+#topLvlPgContent_desktop {
+	position:absolute;
+	top:0;
+	width:850px;
+	min-height:200px;
+	overflow:hidden;
+}
+
+
+#leftSideCol {
+	position:absolute;
+	top:10px; 
+	left:0px;
+	width:300px;
+	min-height:500px;
+}
+
+
+.sidePanel_desktop {
+	background-color:white;
+	border:solid silver 1px;
+	margin-left:0px;
+	text-align:left;
+	border-radius:5px;
+	margin-bottom:8px;
+	width:300px;
+	min-height:200px;
+	padding:6px;
+	font-size:11pt;
+}
+
+.smlHdr {
+	color:#606770;
+	font-size:10pt;
+}
+
+.wallUsrTitleCntr {
+	position:relative;
+	top:0px;
+	left:0;
+}
+
+.peopleIcon1 {
+	position:absolute;
+	top:2px; 
+	left:6px;
+}
+
+.wallUsrTitle {
+	position:absolute;
+	top:4px; 
+	left:40px;
+}
+
+.usrLstCntr {
+	position:relative;
+	top:35px;
+	left:0;
+} 
+
+.usrPicCntr {
+	position:absolute;
+	padding:0;
+	margin:0;
+	width:95px;
+	height:95px;
+	overflow:hidden;
+}
+
+.usrPic {
+	position:absolute;
+	left:0;
+	top:0;
+	width:95px;
+	height:95px;
+	padding:0;
+	margin:0;
+	cursor:pointer;
+}
+
+.usrPicName {
+	position:absolute;
+	left:0px;
+	top:58px;
+	width:95px;
+	height:24px;
+	color:white;
+	font-size:9pt;
+	text-align:center;
+	z-index:20;
+	padding:0;
+	margin:0;
+	text-shadow: 1px 1px gray;
+	cursor:pointer;
+}
+
+
+.userImg1 {
+	height:38px;
+	width:38px;
+	border:solid silver 1px;
+	border-radius:19px;
+	position:absolute;
+	left:6px;
+	top:6px;
+}
+
+#newPost {
+	border:none;
+	font-size:11pt;
+	position:absolute;
+	left:55px;
+	top:10px;
+	width:420px;
+}
+
+
+#postCheck {
+	
+	width:440px;
+	min-height:10px;
+	font-size:10pt;
+	float:left;
+	text-align:left;
+} 
+
+#postMsg {
+	position:absolute;
+	left:60px;
+	top:72px;
+	font-size:9pt;
+}
+
+.postElipses {
+	position:absolute;
+	top:15px;
+	left:480px;
+	width:16px;
+	cursor:pointer;
+}
+
+
+#msgCol {
+	position:relative;
+	top:10px;
+	left:335px;
+	height:2000px;
+	overflow-x:hidden;
+	overflow-y:auto; 
+	border-bottom:solid gray 1px;
+}
+
+.sidePanelList {
+	list-style-type:none;
+	margin:0px;
+	padding:0;
+	float:left;
+	width:512px;
+}
+
+
+#msgs {
+	list-style-type:none;
+	margin:0px;
+	padding:0;
+	position:absolute;
+	left:0;
+	top:135px;
+	float:left;
+}
+
+.liMsg {
+	padding:0;
+	margin:0;
+	float:left;
+}
+
+
+
+
+.msgCntr {
+	position:relative;
+	left:0;
+	top:0;
+	width:510px;
+	min-height:100px;
+	background-color:white;
+	border:solid silver 1px;
+	margin-left:0px;
+	float:left;
+	border-radius:5px;
+	margin-bottom:8px;
+}
+
+.hr1 {
+	position:absolute;
+	left:8px;
+	top:52px;
+	width:495px;
+	color:silver;
+}
+
+#postBtn {
+	position:absolute;
+	left:8px;
+	top:65px;
+	background-color:#375a97;
+	color:white;
+	border:none;
+	border-radius:5px;
+	font-size:10pt;
+	cursor:pointer;
+	display:none;
+}
+
+.genericBtn {
+	background-color:#375a97;
+	color:white;
+	border:none;
+	border-radius:3px;
+	font-size:10pt;
+	cursor:pointer;
+}
+
+.signupBtn {
+	background-color:#00b300;
+	color:white;
+	border:none;
+	border-radius:3px;
+	font-size:10pt;
+	cursor:pointer;
+}
+
+
+.userNameTitle {
+	font-size:11pt;
+	font-weight:bold;
+	color:#375a97;
+	cursor:pointer;
+}
+
+.userNameTitle2 {
+}
+
+.postUserName {
+	position:absolute;
+	left:55px;
+	top:6px;
+}
+
+.postedAtInfo {
+	position:absolute;
+	left:55px;
+	top:26px;
+	font-size:10pt;
+	color:#606770;
+}
+
+.postContent {
+	position:absolute;
+	left:55px;
+	top:50px;
+	width:440px;
+	min-height:100px;
+	font-size:10pt;
+	float:left;
+	text-align:left;
+	
+}
+
+#tint {
+	position:absolute;
+	left:0;
+	top:0;
+	background-color:black;
+	opacity:.7;
+	z-index:50;
+	display:none;
+}
+
+#logonPanel {
+	position:absolute;
+	z-index:100;
+	background-color:silver;
+	width:500px;
+	height:300px;
+	display:none;
+	border-radius:3px;
+	overflow:hidden;
+}
+
+.tabLeftSpacing {
+	position:absolute;
+	left:0;
+	top:4px;
+	height:24px;
+	border-bottom:solid gray 1px;
+	border-top:solid silver 1px;
+	width:10px;
+}
+
+.activeTab {
+	position:absolute;
+	top:4px;	
+	height:26px;
+	width:100px;
+	background-color:#ffcc99;
+	border-left:solid gray 1px;
+	border-top:solid gray 1px;
+	border-right:solid gray 1px;
+	border-radius: 3px 3px 0px 0px;
+	text-align:center;
+	box-sizing: border-box;
+	padding-top:2px;
+	
+}
+
+.inactiveTab {
+	position:absolute;
+	top:4px;
+	height:26px;
+	width:100px;
+	background-color:#cc8800;
+	color:#e0e0eb;
+	border:solid black 1px;
+	border-radius: 3px 3px 0px 0px;
+	text-align:center;
+	padding-top:4px;
+	overflow:hidden;
+	box-sizing: border-box;
+	cursor:pointer;
+}
+
+.loginTab {
+	left:10px;
+}
+
+.signupTab {
+	left:115px;
+}
+
+.tabRightSpacing {
+	position:absolute;
+	left:215px;
+	top:4px;
+	height:24px;
+	border-top:solid silver 1px;
+	border-bottom:solid gray 1px;
+	width:285px;
+}
+
+
+#logonView {
+	position:absolute;
+	left:0;
+	top:30px;
+	width:500px;
+	height:275px;
+	background-image:linear-gradient(#ffcc99, #ffc100);
+}
+
+#logonInfoMsg {
+	position:absolute;
+	left:8px;
+	top:26px;
+	width:460px;
+	height:30px;
+}
+
+
+.hdr1{
+	position:absolute;
+	left:12px;
+	top:60px;
+	font-size:20pt;
+}
+
+.hdr2{
+	position:absolute;
+	left:12px;
+	top:5px;
+	font-size:20pt;
+}
+
+
+#lblEmailAdr {
+	position:absolute;
+	left:12px;
+	top:120px;
+	font-size:15pt;
+}
+
+#logonEmailAdr {
+	position:absolute;
+	left:160px;
+	top:118px;
+	width:280px;
+	font-size:15pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+#lblPassword {
+	position:absolute;
+	left:12px;
+	top:170px;
+	font-size:15pt;
+}
+
+#pwd {
+	position:absolute;
+	left:160px;
+	top:168px;
+	width:280px;
+	font-size:15pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+.cancelBtn {
+	background-color:#E9EBEE;
+	border:solid gray 2px;
+	color:black;
+	font-size:15pt;
+	position:absolute;
+	width:100px;
+	height:40px;
+	border-radius:5px;
+	cursor:pointer;
+}
+
+.cancelBtnLogon {
+	left:12px;
+	top:225px;
+	
+}
+
+.userSubmitBtn {
+	color:white;
+	font-size:15pt;
+	background-color:#375a97;
+	position:absolute;
+	width:100px;
+	height:40px;
+	border-radius:5px;
+	border:none;
+	cursor:pointer;
+}
+
+.userSubmitBtnDisabled {
+	color:white;
+	font-size:15pt;
+	background-color:#9db5d7;
+	position:absolute;
+	width:100px;
+	height:40px;
+	border-radius:5px;
+	border:none;
+	cursor:pointer;
+}
+
+.userSubmitBtnLogon {
+	left:390px;
+	top:225px;
+}
+
+.notAUser {
+	position:absolute;
+	top:235px;
+	left:175px;
+}
+
+
+.specLnk {
+	text-decoration:underline;
+	cursor:pointer;
+	color:#375a97;
+}
+
+
+#signUpView {
+	position:absolute;
+	left:0;
+	top:30px;
+	width:500px;
+	height:275px;
+	display:none;
+	background-image:linear-gradient(#ffcc99, #ffc100);
+}
+
+
+#lblInvitationCode {
+	position:absolute;
+	left:12px;
+	top:40px;
+	font-size:12pt;
+}
+
+#invCode {
+	position:absolute;
+	left:160px;
+	top:38px;
+	width:100px;
+	font-size:12pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+#lblEmailAdr2 {
+	position:absolute;
+	left:12px;
+	top:64px;
+	font-size:12pt;
+}
+
+#logonEmailAdr2 {
+	position:absolute;
+	left:160px;
+	top:62px;
+	width:280px;
+	font-size:12pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+#lblEmailAdr2c {
+	position:absolute;
+	left:12px;
+	top:88px;
+	font-size:12pt;
+}
+
+#logonEmailAdr2_confirm {
+	position:absolute;
+	left:160px;
+	top:86px;
+	width:280px;
+	font-size:12pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+
+
+#lblUsrFirstName {
+	position:absolute;
+	left:12px;
+	top:112px;
+	font-size:12pt;
+}
+
+#usrFirstName {
+	position:absolute;
+	left:160px;
+	top:110px;
+	width:200px;
+	font-size:12pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+
+#lblUsrLastName {
+	position:absolute;
+	left:12px;
+	top:136px;
+	font-size:12pt;
+}
+
+#usrLastName {
+	position:absolute;
+	left:160px;
+	top:134px;
+	width:200px;
+	font-size:12pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+
+#lblPassword2 {
+	position:absolute;
+	left:12px;
+	top:160px;
+	font-size:12pt;
+}
+
+#pwd2 {
+	position:absolute;
+	left:160px;
+	top:158px;
+	width:160px;
+	font-size:12pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+
+#lblPassword2c {
+	position:absolute;
+	left:12px;
+	top:184px;
+	font-size:12pt;
+}
+
+#pwd2_confirm {
+	position:absolute;
+	left:160px;
+	top:182px;
+	width:160px;
+	font-size:12pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+#signUpMsg {
+	position:absolute;
+	left:120px;
+	top:235px;
+	width:260px;
+	background-color:lightyellow;
+	border-radius: 3px;
+	color:red;
+}
+
+
+#logOffPanel {
+	position:absolute;
+	z-index:100;
+	width:300px;
+	height:120px;
+	left:100px;
+	top:100px;
+	background-color:#d9e6f2;
+	border:solid #375a97 2px;
+	border-radius: 3px;
+	display:none;
+} 
+
+.lblLogoff {
+	position:absolute;
+	left:0px;
+	top:28px;
+	text-align:center;
+	width:300px;
+	
+}
+
+
+
+#userProfilePanel {
+	position:absolute;
+	z-index:100;
+	background-color:silver;
+	display:none;
+	width:400px;
+	height:200px;
+	border-radius: 3px;
+}
+
+
+#statusMsg {
+	position:absolute;
+	top:38px;
+	z-index:100;
+	width:500px;
+	background-color:lightyellow;
+	border-radius: 3px;
+	border:solid #375a97 2px;
+	font-size:16pt;
+	color:#375a97;
+	text-align:center;
+	padding:4px;
+	display:none;
+} 
+
+#problems {
+	position:absolute;
+	top:100px;
+	left:10px;
+	display:none;
+	z-index:200;
+	background-color:yellow;
+}
+
+
+
+
+
+
+
+
+
