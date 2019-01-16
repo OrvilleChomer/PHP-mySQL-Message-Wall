@@ -20,13 +20,14 @@
 	$nTmpMsgId = (int)$_POST["tmpMsgId"];
 	$sPostContent = $_POST["postContent"];
 	$nParentMsgId = (int)$_POST["parentMsgId"];
-	
+	$nTopLevelMsgId = (int)$_POST["topLevelMsgId"];
 	
 	$sql = 'INSERT INTO wallMessages (';
 	$sql = $sql . '   userId,';
 	$sql = $sql . '   msgTimestamp,';
 	$sql = $sql . '   msgContent,';
 	$sql = $sql . '   parentMsgId,';
+	$sql = $sql . '   topLevelMsgId,';
 	$sql = $sql . '   likeCount,';
 	$sql = $sql . '   commentCount';
 	$sql = $sql . ') VALUES(';
@@ -34,6 +35,7 @@
 	$sql = $sql . '   NOW(),'; // msgTimestamp
 	$sql = $sql . '   :msgContent,';
 	$sql = $sql . '   :parentMsgId,';
+	$sql = $sql . '   :topLevelMsgId,';
 	$sql = $sql . '   0,'; // like count starts at zero
 	$sql = $sql . '   0 '; // comment count starts at zero
 	$sql = $sql . ')';
@@ -42,6 +44,7 @@
 	$stmt->bindParam(':userId', $nUserId, PDO::PARAM_INT);	
 	$stmt->bindParam(':msgContent', $sPostContent);
 	$stmt->bindParam(':parentMsgId', $nParentMsgId, PDO::PARAM_INT);
+	$stmt->bindParam(':topLevelMsgId', $nTopLevelMsgId, PDO::PARAM_INT);
  	$stmt->execute();
  	
  	$nMsgId = $db->lastInsertId();

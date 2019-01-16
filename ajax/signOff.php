@@ -15,7 +15,7 @@
 		echo '{' . "\n";
 		echo '"status":"fail",' . "\n";
 		echo '"reason":"1"';
-		outputLatestWallMessages();
+		outputLatestWallMessages(0);
 		echo '}';
 		return;
 	} // end if

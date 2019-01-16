@@ -44,7 +44,7 @@
 		</div>
 		
 		<div id="pgHdr">
-			<img src="./imgs/siteLogo.png" id="msgWallLogo" border="0">
+			<a href="./"><img src="./imgs/siteLogo.png" id="msgWallLogo" border="0"></a>
 			<div id="siteTitle">Orville Chomer's Message Wall Demo (PHP/mySQL)</div>
 		</div>
 		<div id="postCheck"></div>
@@ -69,8 +69,10 @@
 								border="0" width="24" height="24">
 								<b class="wallUsrTitle">Message Wall Users</b>
 								</div>
+								
 								<div id="wallUserLst"></div>
 								</div></li>
+								<!--<li><div>Orville Chomer &copy; <span id="cpyrtYr"></span></div></li> -->
 							</ul>
 						</div>
 						
@@ -102,7 +104,7 @@
 						
 					</div><!-- topLvlPgContent_desktop -->
 					
-
+               
 			</div><!-- viewPort -->
 		
 		<div id="tint" onclick="hideCurrentPanel()"></div>
@@ -237,5 +239,6 @@
 		<script src="./js/msgWallDemo.js<?= $uniqueParam ?>"></script>
 		<script src="./js/generalBlurb.js<?= $uniqueParam ?>"></script>
 		<script src="./js/popupMenu.js<?= $uniqueParam ?>"></script>
+		<script src="./js/duh.js<?= $uniqueParam ?>"></script>
 	</body>
 </html>

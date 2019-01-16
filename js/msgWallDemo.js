@@ -13,6 +13,11 @@
 		
 	var postCheck;
 	
+	
+
+	
+	
+	
 		
    /***************************************************************
        run when the onload event fires for the page:
@@ -25,33 +30,35 @@
 		postCheck = $("#postCheck")[0]; // done at global level to slightly improve performance
 		
 		app.CR_key = 13;
-		app.resizing = false;
-		app.logonEmail = "";
 		app.contentWidth = 850;
 		app.currentOpenDialog = "";
 		app.currentUserId = 0;
 		app.currentUserObj = undefined;
 		app.currentUserWallId = 0;   // which user's wall are we looking at?
-		app.defaultUserImagePath = "./imgs/unknownUser.png";
+		app.defaultUserImagePath = "./userImages/noPic.png";
 		app.hdrHeight = 42;
+		app.idMapping = [];  // lookup maps temp id to final id
+		app.lastWallMsgQry = "01/01/1900 01:22:00"; // fallback date
+		app.logonEmail = "";
+		app.logonHashCode = "";
 		app.logoWidth = 32;		
 		app.msgsPerPage = 10;		
 		app.panelWidth = 500;
 		app.panelHeight = 300;
-		
-		app.statusMsgWidth = 500;
-		app.lastWallMsgQry = "01/01/1900 01:22:00"; // fallback date
-		app.logonHashCode = "";
-		app.requireInvCode = true;
 		app.lastTmpId = 0;
 		app.postsByIndex = [];
 		app.postsById = [];
 		app.postDataLoaded = false;
+		app.processingInput = false;
+		app.requireInvCode = true;
+		app.resizing = false;
+		app.statusMsgWidth = 500;
 		app.titleSpacing = 18;
 		app.topLevelPostsByIndex = [];
 		app.usersByIndex = [];
 		app.usersById = [];
 		app.userDataLoaded = false;
+		
 		
 		if (sessionStorage.currentUserId) {
 			app.currentUserId = Number(sessionStorage.currentUserId);
@@ -150,6 +157,19 @@
 	
 	
 	
+	
+   /***************************************************************
+
+	***************************************************************/
+	function beginEnteringComment(nPostId) {
+		var newComment = $("#newComment"+nPostId);
+		
+		newComment.focus();
+	} // end of function beginEnteringComment()
+	
+	
+	
+	
    /***************************************************************
 	
 	   called by:  validPwd()
@@ -169,80 +189,7 @@
 	} // end of function checkCharCount()
 	
 		
-		
-		
-	
-   /***************************************************************
-      {"ctrlId":"txtBlah",
-       "inputType": EMAIL_INPUT,
-       "validateFunction": validEmailAdr,
-       "fromInput": nFromInput,
-       "firstProblem": nFirstProblem
-       
-       ... optional:
-       "submitCtlName":"btnSignIn"
-       "extraParam1": "a value",
-       "extraParam2": "a value",
-       }
-       
-       sInputCtlId, nInputType, fnCheck, nFromInput, nFirstProblem, bOnBlur, sSubmitCtlName
-	***************************************************************/		
-	function checkUserInput(params) {
-		var sInputCtlId = params.ctrlId;
-		var nInputType = params.inputType;
-		var fnCheck = params.validateFunction;
-		var nFromInput = params.fromInput;
-		var nFirstProblem = params.firstProblem;
-		var nParamCount = 1;
-		var inputCtl = $("#"+sInputCtlId)[0];
-		var submitCtl;
-		var sValue = inputCtl.value;
-		var bOk = fnCheck(sValue);
-		var bUpdateSubmitButton = false;
-		var retObj = {};
-		
-		if (typeof sSubmitCtlName === "string") {
-			submitCtl = $("#"+sSubmitCtlName)[0];
-			bUpdateSubmitButton = true;
-		} // end if
-		
-		if (bOk) {
-			inputCtl.style.border = "solid gray 1px";
-			inputCtl.style.backgroundColor = "white";
-		} else {
-			if (nFirstProblem === INPUT_OK) {
-				nFirstProblem = nInputType;
-				
-				if (bOnBlur) {
-					inputCtl.focus();
-				} // end if
-			} // end if
-			
-			if (nInputType === nFromInput) {
-				inputCtl.style.border = "solid #ff3333 1px";
-				inputCtl.style.backgroundColor = "#ffe6e6";
-			} // end if
-		} // end if/else
-		
-		if (bUpdateSubmitButton) {
-			if (nFirstProblem === INPUT_OK) {
-				submitCtl.disabled = false;
-				submitCtl.className = "userSubmitBtn userSubmitBtnLogon";
-			} else {
-				submitCtl.disabled = true;
-				submitCtl.className = "userSubmitBtnDisabled userSubmitBtnLogon";
-			} // end if/else
-		} // end if
-		
-		retObj.firstProblem = nFirstProblem;
-		retObj.fldValue = sValue;
-		
-		return retObj;
-	} // end of function checkUserInput()
-	
-	
-	
-	
+
    /***************************************************************
       in page setup, call Before code to display page
 	***************************************************************/	
@@ -259,21 +206,53 @@
 		} // end if
 		
 	} // end of function checkForUserWall()
-	
-	
-	var bDroppedIn = false;
+
+
+
+
 	
    /***************************************************************
-	called when logon panel's email text box loses focus
+	called when logon panel's:
+	  - email text box loses focus, or:
+	  - keyup event occurs on email text box, or:
+	  - password text box loses focus, or:
+	  - keyup event on password text box
 	***************************************************************/
 	function checkLogonInput(nFromInput, bOnBlur) {
-		var nFirstProblem = INPUT_OK; // assumption until proven otherwise	
+	
+		if (app.processingInput) return;
+		
+		var nFirstProblem = INPUT_OK; // assumption everything is Ok until proven otherwise	
 		var retObj;
 		
-		retObj = checkUserInput("logonEmailAdr", EMAIL_INPUT, validEmailAdr, nFromInput, nFirstProblem, bOnBlur);
-		nFirstProblem = retObj.firstProblem;
+		var tmp = $("#pwd")[0];
+		var sVal = tmp.value;
 		
-		retObj = checkUserInput("pwd", PWD_INPUT, validPwd, nFromInput, nFirstProblem, bOnBlur, "btnSignIn");
+		app.processingInput = true;
+		
+		
+		
+		// old: "logonEmailAdr", EMAIL_INPUT, validEmailAdr, nFromInput, nFirstProblem, bOnBlur
+		
+		retObj = checkUserInput({"ctrlId":"logonEmailAdr",
+								 "inputType":EMAIL_INPUT,
+								 "validateFunction":validEmailAdr,
+								 "fromInput":nFromInput,
+								 "firstProblem":nFirstProblem,
+								 "onblur":bOnBlur});
+								 
+		nFirstProblem = retObj.firstProblem;
+	//	if (sVal === "peace!1") debugger;
+		
+		// "pwd", PWD_INPUT, validPwd, nFromInput, nFirstProblem, bOnBlur, "btnSignIn"
+		retObj = checkUserInput({"ctrlId":"pwd",
+								 "inputType":PWD_INPUT,
+								 "validateFunction":validPwd,
+								 "fromInput":nFromInput,
+								 "firstProblem":nFirstProblem,
+								 "onblur":bOnBlur,
+								 "submitCtlName":"btnSignIn"});
+								 
 		nFirstProblem = retObj.firstProblem;
 		
 		
@@ -286,6 +265,7 @@
 		
 		} // end if
 		
+		app.processingInput = false;
 	} // end of function checkLogonEmailInput() 
 	
 	
@@ -324,22 +304,122 @@
 	
 	
 	
+	
+		
+		
+	
+   /***************************************************************
+
+	***************************************************************/		
+	function checkUserInput(params) {
+		if (typeof params !== "object") { 
+			console.log("not passing in object!");
+			return;
+		} // end if
+		
+		var sInputCtlId = params.ctrlId;
+		var nInputType = params.inputType;
+		var fnCheck = params.validateFunction;
+		var nFromInput = params.fromInput;
+		var nFirstProblem = params.firstProblem;
+		var sSubmitCtlName = params.submitCtlName;
+		var nParamCount = 1;
+		var inputCtl = $("#"+sInputCtlId)[0];
+		var submitCtl;
+		var sValue = inputCtl.value;
+		var bOk = fnCheck(sValue);
+		var bUpdateSubmitButton = false;
+		var retObj = {};
+		var bOnBlur = false;
+		
+		if (typeof sSubmitCtlName === "string") {
+			submitCtl = $("#"+sSubmitCtlName)[0];
+			bUpdateSubmitButton = true;
+		} // end if
+		
+		if (typeof params.onblur === "boolean") {
+			bOnBlur = params.onblur;
+		} // end if
+		
+		if (bOk) {
+			inputCtl.style.border = "solid gray 1px";
+			inputCtl.style.backgroundColor = "white";
+		} else {
+			if (nFirstProblem === INPUT_OK) {
+				nFirstProblem = nInputType;
+				
+				if (bOnBlur) {
+					inputCtl.focus();
+				} // end if
+			} // end if
+			
+			if (nInputType === nFromInput) {
+				inputCtl.style.border = "solid #ff3333 1px";
+				inputCtl.style.backgroundColor = "#ffe6e6";
+			} // end if
+		} // end if/else
+		
+		
+		// is there a submit button to update?
+		if (bUpdateSubmitButton) {
+			if (nFirstProblem === INPUT_OK) {
+				submitCtl.disabled = false;
+				submitCtl.className = "userSubmitBtn userSubmitBtnLogon";
+			} else {
+				submitCtl.disabled = true;
+				submitCtl.className = "userSubmitBtnDisabled userSubmitBtnLogon";
+			} // end if/else
+		} // end if
+		
+		retObj.firstProblem = nFirstProblem;
+		retObj.fldValue = sValue;
+		
+		return retObj;
+	} // end of function checkUserInput()
+	
+	
+	
+		
+	
    /***************************************************************
       make sure all user's inputs for sign up are ok before
       enabling button!
 	***************************************************************/	
 	function checkSignUpInput(nFromInput, bOnBlur) {
+		if (app.processingInput) return;
+		
 		var nFirstProblem = INPUT_OK; // assumption until proven otherwise
 		var retObj,sEmailAdr,sEmailAdrConfirm;
 		
-		retObj = checkUserInput("invCode", INVCODE_INPUT, validConfirmationCode, nFromInput, nFirstProblem, bOnBlur);
+		app.processingInput = true;
+
+		retObj = checkUserInput({"ctrlId":"invCode",
+								 "inputType":INVCODE_INPUT,
+								 "validateFunction":validConfirmationCode,
+								 "fromInput":nFromInput,
+								 "firstProblem":nFirstProblem,
+								 "onblur":bOnBlur});
+								 
 		nFirstProblem = retObj.firstProblem;
 		
-		retObj = checkUserInput("logonEmailAdr2", EMAIL_INPUT, validEmailAdr, nFromInput, nFirstProblem, bOnBlur);
+		retObj = checkUserInput({"ctrlId":"logonEmailAdr2",
+								 "inputType":EMAIL_INPUT,
+								 "validateFunction":validEmailAdr,
+								 "fromInput":nFromInput,
+								 "firstProblem":nFirstProblem,
+								 "onblur":bOnBlur});
+								 
 		nFirstProblem = retObj.firstProblem;
+		
 		sEmailAdr = retObj.fldValue;
-		
-		retObj = checkUserInput("logonEmailAdr2_confirm", EMAIL_INPUT, validEmailAdr, nFromInput, nFirstProblem, bOnBlur);
+			
+		retObj = checkUserInput({"ctrlId":"logonEmailAdr2_confirm",
+								 "inputType":EMAIL_INPUT,
+								 "validateFunction":validEmailAdr,
+								 "fromInput":nFromInput,
+								 "firstProblem":nFirstProblem,
+								 "onblur":bOnBlur});
+								 
 		nFirstProblem = retObj.firstProblem;
 		sEmailAdrConfirm = retObj.fldValue;
 	
@@ -355,13 +435,6 @@
 		var sFirstName = usrFirstName.value;
 		var sLastName = usrLastName.value;
 
-EMAIL_INPUT = 1;
-	var PWD_INPUT = 2;
-	var EMAIL_INPUT2 = 3;
-	var PWD_INPUT2 = 4;
-	var FIRSTNAME_INPUT = 5;
-	var LASTNAME_INPUT = 6;
-	var INVCODE_INPUT	
 		
 		if (validEmailAdr(sLogonEmailAdr)) {
 		} else {
@@ -391,7 +464,11 @@ EMAIL_INPUT = 1;
 			btnSignUp.className = "userSubmitBtnDisabled userSubmitBtnLogon";
 		} // end if/else
 		
+		app.processingInput = false;
 	} // end of function checkSignUpInput()
+	
+	
+	
 	
 	
 	
@@ -418,20 +495,50 @@ EMAIL_INPUT = 1;
        - they have typed in a message to post on the wall
        - they have clicked the POST button or hit the Enter key
 	***************************************************************/
-	function createNewPostObj(sMsg) {
+	function createNewPostObj(sMsg, niParentMsgId) {
 		var post = {};
+		var parentMsg;
 		
 		post.msgId = getTempId();
 		post.parentMsgId = 0; // default until otherwise changed
+		post.topLevelMsgId = 0;
 		post.userId = app.currentUserId;
 		post.msgTimestamp = new Date();
 		post.msgContent = sMsg;		
 		post.postHeight = 0;
 		post.likeCount = 0;
+		post.youLiked = false;
+		post.commentCount = 0;
 		post.parentPost = undefined;
 		post.repliesByIndex = [];
 		post.repliesById = [];
 		post.hasParent = false;
+		post.indentLevel = 0;
+		post.repliesExpanded = false;
+		
+		if (typeof niParentMsgId === "number") {
+			if (niParentMsgId > 0) {
+				post.parentMsgId = niParentMsgId;
+				parentMsg = app.postsById[post.parentMsgId];
+				post.parentPost = parentMsg;
+				
+				// note: only Top Level wall messages are in reverse chronological
+				//       order!
+				parentMsg.repliesByIndex[parentMsg.repliesByIndex.length] =post;
+				 
+				parentMsg.commentCount = parentMsg.commentCount + 1;
+				post.hasParent = true;
+				post.indentLevel = parentMsg.indentLevel + 1;
+				
+				if (parentMsg.indentLevel < 1) {
+					post.topLevelMsgId = niParentMsgId;
+				} else {
+					post.topLevelMsgId = parentMsg.topLevelMsgId;
+				} // end if/else
+				
+			} // end if
+		} // end if
+		
 		
 		return post;
 	} // end of function createNewPostObj()
@@ -458,12 +565,238 @@ EMAIL_INPUT = 1;
 
 	
 	
+   /***************************************************************
+   	   called as user types in their comment
+   	   or, paste into comment...
+   	   ... or their Reply to a comment!
+	***************************************************************/		
+	function editComment(inpCtrl, nMsgId) {
+		var sValue = inpCtrl.value;
+
+		if (typeof nMsgId !== "number") {
+			alert("editComment() - problem! nMsgId="+nMsgId);
+			return;
+		} // end if
+		
+		nMsgId = getActualId(nMsgId);
+		
+		if (sValue.length > 0) {
+			// user presses ENTER or RETURN key:			
+			if (event.keyCode === app.CR_key) {
+				savePost(nMsgId, sValue, inpCtrl);
+			} // end if
+		} // end if
+		
+	} // end of function editComment()
+	
+	
+	
+	
+	
+	
+   /***************************************************************
+	***************************************************************/		
+	function expandReplies(nPostId) {
+		var postReplies;
+		var commentReply;
+		
+		nPostId = getActualId(nPostId);
+		postReplies = $("#postReplies"+nPostId)[0];
+		
+		commentReply = app.postsById[nPostId];
+		
+		commentReply.repliesExpanded = true;
+		
+		postReplies.innerHTML = genPostReplyMarkup(commentReply);
+		
+	} // end of function expandReplies()
+	
+	
+	
+	
+	
+   /***************************************************************
+   	   kinda gives a summary of likes and replies for a post
+   	   also gives some link options for liking and commenting
+	***************************************************************/	
+	function genMsgLikesAndCommentsSummaryMarkup(post) {
+		var s=[];
+		
+		s[s.length] = "<li class='msgSection'>";
+			s[s.length] = "<div class='msgLikeAndCountSummary' >";
+			
+			if (post.likeCount > 0 || post.commentCount > 0) {
+				s[s.length] = "<div class='msgCountInfo' ";
+				s[s.length] = "id='lblCommentCount"+post.msgId+"' ";
+				s[s.length] = ">xxx";
+				s[s.length] = "</div>";	//msgCountInfo
+				s[s.length] = " likes";
+			
+				s[s.length] = post.commentCount;
+				s[s.length] = " comments";
+			} // end if
+			
+			s[s.length] = "<center>";
+			
+			s[s.length] = "<img class='likeCommentShareBtn' src='./imgs/likeButton.png' ";
+			s[s.length] = ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+			
+			s[s.length] = "<img class='likeCommentShareBtn' src='./imgs/commentButton.png' ";
+			s[s.length] = "onclick=";
+			s[s.length] = Q+"beginEnteringComment("+post.msgId+")"+Q+" ";
+			s[s.length] = ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+			
+			s[s.length] = "<img class='likeCommentShareBtn' src='./imgs/shareButton.png' ";
+			s[s.length] = ">";
+			s[s.length] = "</center>";
+						
+			s[s.length] = "</div>";	//msgLikeAndCountSummary
+		s[s.length] = "</li>"; // msgSection
+		
+		return s.join("");
+		
+	} // end of function genMsgLikesAndCommentsSummaryMarkup()
+	
 	
 	
    /***************************************************************
 	***************************************************************/	
 	function genPostReplyMarkup(post) {
 		var s=[];
+		var nMax = post.repliesByIndex.length;
+		var n, reply, reply2;
+		var sClass1 = "commentMsgCntr";
+		var sClass2 = "commentMsg";
+		var sImgClass = "commentUsrImg2";
+		var usr;
+		var sPostedAt, sReply;
+		
+		for (n=0;n<nMax;n++) {
+			reply = post.repliesByIndex[n];  // can be a Comment or a Reply 
+			
+			usr = app.usersById[reply.userId];
+			sPostedAt = getFormattedRelativeDateTime(reply.msgTimestamp);
+			
+			// only do on replies... the Comment <li> tag generation is in genWallPostMarkup()
+			if (post.indentLevel > 1) {
+				s[s.length] = "<li class='"+sClass1+"'>";				
+			} // end if
+			
+			if (reply.indentLevel > 1) {
+				sImgClass = "replyUsrImg2";
+			} // end if
+			
+				s[s.length] = "<table>";
+				s[s.length] = "<tr valign='top'>";
+				s[s.length] = "<td >";
+				s[s.length] = "<img src="+Q+usr.userImagePath+Q+" class='"+sImgClass+"' border='0'>";
+				s[s.length] = "</td>";
+				s[s.length] = "<td width='*'>";
+					s[s.length] = "<div class='"+sClass2+"'>";
+					s[s.length] = "<span ";
+					s[s.length] = "onclick="+Q+"showUsersPosts("+reply.userId+")"+Q+" ";
+					s[s.length] = "class='commentUserName userNameTitle'>"+usr.userFullName+"</span>&nbsp;&nbsp;";
+					
+				
+					s[s.length] = reply.msgContent;
+					s[s.length] = "</div>";
+				
+					s[s.length] = "&nbsp;&nbsp;&nbsp;";
+					s[s.length] = "<span class='smallLink' ";
+					s[s.length] = "id='likeLnk"+reply.msgId+"' ";
+					s[s.length] = "onclick="+Q+"likeUnlike("+reply.msgId+")"+Q+" ";
+					s[s.length] = ">";
+					
+					if (reply.youLiked) {
+						s[s.length] = "unlike";
+					} else {
+						s[s.length] = "like";
+					} // end if
+					
+					s[s.length] = "</span>";
+					s[s.length] = " · ";
+					s[s.length] = "<span class='smallLink' ";
+					s[s.length] = " onclick='startAReplyTo("+reply.msgId+")' ";
+					s[s.length] = ">";
+					s[s.length] = "reply</span>";
+					s[s.length] = " · ";
+					
+					s[s.length] = "<span class='postedAtInfo2'>";
+					s[s.length] = sPostedAt;
+					s[s.length] = "</span>";
+				s[s.length] = "</td>";
+				s[s.length] = "</tr>";
+			s[s.length] = "</table>";
+						
+			s[s.length] = "<div class='commentReplies'>";
+			
+            s[s.length] = "<ul class='postReplies' id='postReplies"+reply.msgId+"'>";
+            			
+            
+            			
+			if (reply.repliesByIndex.length > 0) {
+				
+				if (post.repliesExpanded) {						
+					s[s.length] = genPostReplyMarkup(reply);						
+				} else {	
+					reply2 = reply.repliesByIndex[reply.repliesByIndex.length-1];
+					usr = app.usersById[reply2.userId];
+					s[s.length] = "<li>";
+								
+					s[s.length] = "<table><tr>";
+					
+					s[s.length] = "<td width='12'>";
+					s[s.length] = "<img ";
+					s[s.length] = "class='lnkOnly' ";
+					s[s.length] = "onclick='expandReplies("+reply.msgId+")' ";
+					s[s.length] = "src='./imgs/replyArrow.png' width='11' height='8' border='0'>";
+					s[s.length] = "</td>";
+					
+					s[s.length] = "<td>";
+					s[s.length] = "<img ";
+					s[s.length] = "class='lnkOnly replyUsrImg' ";
+					s[s.length] = "onclick='expandReplies("+reply.msgId+")' ";
+					s[s.length] = " src="+Q+usr.userImagePath+Q+" border='0'>";
+					s[s.length] = "</td>";
+					
+					s[s.length] = "<td width='*'>";
+					s[s.length] = "<span class='postRepliesSum1' ";
+					s[s.length] = "onclick='expandReplies("+reply.msgId+")' ";
+					s[s.length] = ">";	
+					s[s.length] = usr.userFullName;
+					s[s.length] = " replied ";
+					s[s.length] = "</span>";
+					s[s.length] = " · ";
+					
+					s[s.length] = "<span class='postRepliesSum1' ";
+					s[s.length] = "onclick='expandReplies("+reply.msgId+")' ";
+					s[s.length] = ">";
+					s[s.length] = (reply.repliesByIndex.length)+" ";
+					sReply = "Reply";
+					
+					if (reply.repliesByIndex.length > 1) {
+						sReply = "Replies";
+					} // end if
+					
+					s[s.length] = sReply;
+					s[s.length] = "</span>";
+					s[s.length] = "</td>";
+					
+					s[s.length] = "</tr></table>";
+					
+					s[s.length] = "</li>";
+				} // end if/else
+				
+			} // end if
+			
+			s[s.length] = "</ul>";  // postReplies
+			s[s.length] = "</div>"; // commentReplies
+			
+			// only do on replies... the Comment <li> tag generation is in genWallPostMarkup()
+			if (post.indentLevel > 1) {
+				s[s.length] = "</li>"; // commentMsgCntr
+			} // end if
+		} // next n
 		
 		
 		return s.join("");
@@ -473,6 +806,7 @@ EMAIL_INPUT = 1;
 	
 	
    /***************************************************************
+
 	***************************************************************/
 	function genWallPostMarkup(post) {
 		var s=[];
@@ -481,45 +815,101 @@ EMAIL_INPUT = 1;
 		var sPostedAt = getFormattedRelativeDateTime(post.msgTimestamp);
 
 		
-		if (post.postHeight ===0) {
-			post.postHeight = getMsgHeight(post);
-		} // end if
-		
 		s[s.length] = "<li class='liMsg'>";
 		
+		    
 		
+		
+		// msgCntr is our white box
 		
 			s[s.length] = "<div class='msgCntr' ";
 			
 			if (post.postHeight > 100) {
-				s[s.length] = "style="+Q+"height:"+post.postHeight+"px;"+Q;
+		//		s[s.length] = "style="+Q+"height:"+post.postHeight+"px;"+Q;
 			} // end if
 			
-			s[s.length] = ">";
-				s[s.length] = "<img src="+Q+usr.userImagePath+Q+" class='userImg1'>";
-				s[s.length] = "<div ";
-				s[s.length] = "onclick="+Q+"showUserProfilePanel("+post.userId+")"+Q+" ";
-				s[s.length] = "class='postUserName userNameTitle'>"+usr.userFullName+"</div>";
+			s[s.length] = ">";  // ending of div msgCntr (not closing tag)
+			
+			s[s.length] = "<ul class='msgSections'>";
 				
-				s[s.length] = "<img ";
-				s[s.length] = "class='postElipses' ";
-				s[s.length] = " src='./imgs/bigElipses.png' border='0'>";
+				// msg header stuff... avatar, user name, etc.
+				s[s.length] = "<li class='msgSection'>";
 				
-				s[s.length] = "<div ";
-				s[s.length] = "title="+Q+sBasicFormattedTimestamp+Q+" ";
-				s[s.length] = "class='postedAtInfo'>"+sPostedAt+"</div>";
-				s[s.length] = "<div class='postContent'>"+post.msgContent;
-				  
+					s[s.length] = "<div class='msgHdrCntr'>";
+					s[s.length] = "<div class='msgHdrCntr2'>";
+					s[s.length] = "<img src="+Q+usr.userImagePath+Q+" class='userImg1'>";
+					
+					s[s.length] = "<div ";
+					s[s.length] = "onclick="+Q+"showUsersPosts("+post.userId+")"+Q+" ";
+					s[s.length] = "class='postUserName userNameTitle'>"+usr.userFullName+"</div>";
+				
+					s[s.length] = "<img ";
+					s[s.length] = "class='postElipses' ";
+					s[s.length] = " src='./imgs/bigElipses.png' border='0'>";
+				
+					s[s.length] = "<div ";
+					s[s.length] = "title="+Q+sBasicFormattedTimestamp+Q+" ";
+					s[s.length] = "class='postedAtInfo'>"+sPostedAt+"</div>";
+					s[s.length] = "</div>&nbsp;";  // msgHdrCntr2
+					s[s.length] = "</div>";  // msgHdrCntr
+				s[s.length] = "</li>";	
+					
+				// actual msg content
+				s[s.length] = "<li class='msgSection'>";
+					s[s.length] = "<div class='postContent'>"+post.msgContent;
+					s[s.length] = "</div>";
+				s[s.length] = "</li>";
+				
+				// actual msg count stuff
+				s[s.length] = genMsgLikesAndCommentsSummaryMarkup(post);
+				
+				// container to place comments into
+				s[s.length] = "<li class='msgSection'>";				
+					s[s.length] = "<div class='commentContainer' ";
+					s[s.length] = "id='commentContainer"+post.msgId+"' ";
+					s[s.length] = ">";
+				
+					s[s.length] = "<ul class='commentsLst'>";
+					
+					// display comments already entered here:
+					s[s.length] = "<li class='commentMsgCntr' id='msgComments"+post.msgId+"'>";
+					s[s.length] = genPostReplyMarkup(post);
+					s[s.length] = "</li>";
+					
+					// place to Add my Own comment
+					s[s.length] = "<li>";
+					
+					s[s.length] = "<table>";
+						s[s.length] = "<tr valign='top'>";
+						s[s.length] = "<td>";
+						s[s.length] = "<img src="+Q+usr.userImagePath+Q+" class='commentUsrImg2'>";
+					
+						s[s.length] = "</td>";
+						s[s.length] = "<td width='*'>";
+						s[s.length] = "<input id='newComment"+post.msgId+"' class='commentInput' ";
+						s[s.length] = " onkeyup="+Q+"editComment(this,"+post.msgId+")"+Q+" ";
+						s[s.length] = " onpaste="+Q+"editComment(this,"+post.msgId+")"+Q+" ";
+						s[s.length] = " placeholder='Write a comment...' ";
+						s[s.length] = ">"; // end of input tag
+						s[s.length] = "</td>";
+						s[s.length] = "</tr>";
+					s[s.length] = "</table>";
+					
+					s[s.length] = "</li>";
+					
+					s[s.length] = "</ul>";
+				
+					s[s.length] = "</div>";
+				s[s.length] = "</li>";
+				
+				// !!! ---
+				
+				s[s.length] = "</ul>"; // msgSections
 				
 				s[s.length] ="</div>";  // postContent
 				
-				s[s.length] = "<div class='lblCommentCount' ";
-				s[s.length] = "id='lblCommentCount"+post.msgId+"' ";
-				s[s.length] = "></div>";
+				s[s.length] = "</li>";
 				
-				s[s.length] = "<div class='commentContainer' ";
-				s[s.length] = "id='commentContainer"+post.msgId+"' ";
-				s[s.length] = "></div>";
 				
 			s[s.length] = "</div>";  // msgCntr class
 		s[s.length] = "</li>"; // liMsg class
@@ -527,6 +917,31 @@ EMAIL_INPUT = 1;
 		return s.join("");
 	} // end of function genWallPostMarkup()
 	
+	
+	
+   /***************************************************************
+      if # is positive, it returns # as is
+      if # is negative it:
+         - checks to see if there is a new positive#, if so, it returns that#
+         - else the fall-back is to return a negative#.   
+         
+         see: setActualId()   
+	***************************************************************/	
+	function getActualId(nId) {
+		var nActualId = nId;  // default
+		var nMappedNumber;
+		
+		// working with a temp id... do we have the final id# yet?
+		if (nId < 0) {
+			nMappedNumber = app.idMapping[nId];
+			
+			if (typeof nMappedNumber === "number") {
+				nActualId = nMappedNumber;
+			} // end if
+		} // end if
+		
+		return nActualId;
+	} // end of function getActualId()
 	
 	
 	
@@ -557,6 +972,36 @@ EMAIL_INPUT = 1;
 		
 		return s.join("");
 	} // end of function getBlurb()
+	
+	
+	
+	
+	
+   /***************************************************************
+     used to get a DOM element whose id ends with a post id
+	***************************************************************/	
+	function getDomEl(sPrefix, nId) {
+		var el = $("#"+sPrefix+(nId))[0];
+		var post;
+		var sId;
+		
+		if (typeof el === "undefined") {
+			if (nId > 0) {
+				post = app.postsById[nId];
+				nId = post.tmpId;
+				sId = sPrefix+(nId);
+				el = $("#"+sId)[0];
+				if (typeof el === "undefined") {
+					alert("problem - getDomEl() - 2 - "+sId);
+				} // end if
+			} else {
+				alert("problem - getDomEl()");
+			} // end if/else
+		} // end if
+		
+		return el;
+	} // end of function getDomEl()
+	
 	
 	
 	
@@ -659,89 +1104,68 @@ EMAIL_INPUT = 1;
 		return sVal;
 	} // end of	function getFormattedTime()
 	
-	
-	
-	
-   /***************************************************************
-      get a value assigned to a key in the web page URL after the
-      pound sign (hash mark '#')
-      
-      example:   mydomain.com?sample=yes#user=123
-      
-        in the above, 'user' is the key, so, if passing 'user' to this
-        function, the value returned would be '123'
-        
-   	   also see function:   setUrlHashValue() !
-	***************************************************************/	
-	function getUrlHashValue(sKey) {
-		var obj = getUrlHashValues();
-		var sValue;
-		
-		if (!obj.hasHashValues) {
-			return "";  // there was no hash value for the key (or any other hash value)!
-		} // end if
-		
-		sKey = sKey.toLowerCase();
-		
-		if (typeof obj.hashValuesByKey[sKey] === "string") {
-			sValue = obj.hashValuesByKey[sKey];
-		} // end if
-		
-	} // end of function getUrlHashValue() 
-	
-	
-	
-   /***************************************************************
-   	  builds an array of key/value pairs that are in the current 
-   	  URL, as well as a "dictionary" that one can use to provide
-   	  a key and get its Value returned!
-   	  
-   	  (used by the function: getUrlHashValue(sKey) )
-	***************************************************************/	
-	function getUrlHashValues() {
-		var obj = {};
-		var sUrl = document.location.href + "";
-		var nPos = sUrl.indexOf("#");
-		var sHashUrl,aParamsByIndex,nMax,n,param; 
-		var aParam,paramObj;
-				
-		obj.hashValuesByIndex = [];
-		obj.hashValuesByKey = [];
-		obj.fullUrl = sUrl;
-		
-		if (nPos === -1) {
-			obj.baseUrl = sUrl;
-			obj.hashUrl = "";
-			obj.hasHashValues = false;
-			return obj;
-		} // end if
-		
-		obj.hasHashValues = true;
-		sHashUrl = sUrl.substr(nPos+1, sUrl.length - nPos - 1);
-		obj.hashUrl = sHashUrl;
-		obj.baseUrl = sUrl.substr(0, nPos);
-		
-		aParamsByIndex = sHashUrl.split("&");
-		nMax = aParamsByIndex.length;
-		
-		for (n=0;n<nMax;n++) {
-			param = aParamsByIndex[n];
-			aParam = param.split("=");
-			
-			if (aParam.length === 2) {
-				paramObj = {};
-				paramObj.key = aParam[0];
-				paramObj.value =  aParam[1];
-				obj.hashValuesByIndex[obj.hashValuesByIndex.length] = paramObj;
-				obj.hashValuesByKey[paramObj.key] = paramObj;
-			} // end if
-		} // next n
-		
-		return obj;
-	} // end of function getUrlHashValues()
 
 	
 	
+	
+   /***************************************************************
+	***************************************************************/	
+	function getJsStack() {
+		try {
+			thisWillThrowAnError.everyTime();
+		} catch(err) {
+			var stackDta = err.stack.split("\n");
+			var stackInfo = {};
+			var stack = [];
+			var nMax = stackDta.length;
+			var sValue,nPos,sValue2;
+			var n,stackEntry;
+			var sHtmlIndexPgName = "index.php";
+			
+			stackInfo.timestamp = new Date();
+			
+			if (nMax>1) {
+				for (n=1;n<nMax;n++) {
+					sValue = stackDta[n];
+					stackEntry = {};
+					stackEntry.funcName = sValue.split("@")[0];
+					sValue = sValue.split("@")[1];
+					stackEntry.jsFileUrl = "";
+					stackEntry.stackDepth = nMax - n;
+					
+					nPos = sValue.indexOf("?");
+					
+					if (nPos > -1) {
+						stackEntry.jsFileUrl = sValue.substr(0,nPos);
+					} // end if
+					
+					sValue = sValue.split(":");
+					
+					if (stackEntry.jsFileUrl === "") {
+						// protocol plus rest of main url
+						sValue2 = sValue[0] + ":" + sValue[1];
+						
+						if (sValue.length-2 > 2) {
+							sValue2 = sValue2 + ":" + sValue[2]; // handle port if there
+						} // end if
+						
+						stackEntry.jsFileUrl = sValue2;
+					} // end if
+					
+					
+					stackEntry.column = sValue[sValue.length-1]-0;
+					stackEntry.lineNum = sValue[sValue.length-2]-0;
+					stack[stack.length] = stackEntry;
+				} // next n
+			} // end if
+			
+			stackInfo.stackByIndex = stack;
+			
+			return stackInfo;
+		} // end try/catch
+	} // end of function getJsStack() 
+	
+		
 	
    /***************************************************************
       Not to be confused with the hash mark (pound sign)..
@@ -929,6 +1353,92 @@ EMAIL_INPUT = 1;
 	
 	
 	
+	
+	
+	
+   /***************************************************************
+      get a value assigned to a key in the web page URL after the
+      pound sign (hash mark '#')
+      
+      example:   mydomain.com?sample=yes#user=123
+      
+        in the above, 'user' is the key, so, if passing 'user' to this
+        function, the value returned would be '123'
+        
+   	   also see function:   setUrlHashValue() !
+	***************************************************************/	
+	function getUrlHashValue(sKey) {
+		var obj = getUrlHashValues();
+		var sValue;
+		
+		if (!obj.hasHashValues) {
+			return "";  // there was no hash value for the key (or any other hash value)!
+		} // end if
+		
+		sKey = sKey.toLowerCase();
+		
+		if (typeof obj.hashValuesByKey[sKey] === "string") {
+			sValue = obj.hashValuesByKey[sKey];
+		} // end if
+		
+	} // end of function getUrlHashValue() 
+	
+	
+	
+   /***************************************************************
+   	  builds an array of key/value pairs that are in the current 
+   	  URL, as well as a "dictionary" that one can use to provide
+   	  a key and get its Value returned!
+   	  
+   	  (used by the function: getUrlHashValue(sKey) )
+	***************************************************************/	
+	function getUrlHashValues() {
+		var obj = {};
+		var sUrl = document.location.href + "";
+		var nPos = sUrl.indexOf("#");
+		var sHashUrl,aParamsByIndex,nMax,n,param; 
+		var aParam,paramObj;
+				
+		obj.hashValuesByIndex = [];
+		obj.hashValuesByKey = [];
+		obj.fullUrl = sUrl;
+		
+		if (nPos === -1) {
+			obj.baseUrl = sUrl;
+			obj.hashUrl = "";
+			obj.hasHashValues = false;
+			return obj;
+		} // end if
+		
+		obj.hasHashValues = true;
+		sHashUrl = sUrl.substr(nPos+1, sUrl.length - nPos - 1);
+		obj.hashUrl = sHashUrl;
+		obj.baseUrl = sUrl.substr(0, nPos);
+		
+		aParamsByIndex = sHashUrl.split("&");
+		nMax = aParamsByIndex.length;
+		
+		for (n=0;n<nMax;n++) {
+			param = aParamsByIndex[n];
+			aParam = param.split("=");
+			
+			if (aParam.length === 2) {
+				paramObj = {};
+				paramObj.key = aParam[0];
+				paramObj.value =  aParam[1];
+				obj.hashValuesByIndex[obj.hashValuesByIndex.length] = paramObj;
+				obj.hashValuesByKey[paramObj.key] = paramObj;
+			} // end if
+		} // next n
+		
+		return obj;
+	} // end of function getUrlHashValues()
+
+	
+	
+	
+		
+	
    /***************************************************************
 	***************************************************************/
 	function getUserInfoMarkup() {
@@ -1028,6 +1538,8 @@ EMAIL_INPUT = 1;
 	} // end of function hideTint()
 	
 	
+	
+	
    /******************************************************************************
     ******************************************************************************/			
 	function jsonParse(sJson) {
@@ -1046,7 +1558,31 @@ EMAIL_INPUT = 1;
 	
 	
 	
-
+	
+   /******************************************************************************
+    ******************************************************************************/	
+	function likeUnlike(nMsgId) {
+		var likeLnk = $("#likeLnk"+nMsgId)[0];
+		var msg = app.postsById[nMsgId];
+		var sInfo = "You need to be logged in before you can un/like a message.";
+		
+		if (app.currentUserId === 0) {
+			showLogonPanel(sInfo);  // got to be logged in first!
+			return;
+		} // end if
+		
+		if (!msg.youLiked) {
+			likeLnk.innerHTML = "unlike";
+			msg.youLiked = true;
+			msg.likeCount = msg.likeCount + 1;
+		} else {
+			likeLnk.innerHTML = "like";
+			msg.youLiked = false;
+			msg.likeCount = msg.likeCount - 1;
+		} // end if/else
+		
+	} // end of function likeUnlike()
+	
 	
 	
 	
@@ -1067,7 +1603,7 @@ EMAIL_INPUT = 1;
 	 	
 	 	logonView.style.display = "block";
 	 	signUpView.style.display = "none";
-	} // end of function
+	} // end of function pickLogonView()
 	
 	
 	
@@ -1088,7 +1624,9 @@ EMAIL_INPUT = 1;
 	 	
 	 	logonView.style.display = "none";
 	 	signUpView.style.display = "block";	
-	} // end of function
+	} // end of function pickSignupView()
+	
+	
 	
 	
 	
@@ -1103,6 +1641,9 @@ EMAIL_INPUT = 1;
 			post = latestPosts[n];
 			
 			post.postHeight = 0; // new or old, need to recalculate
+			
+			post.repliesExpanded = false;
+			post.youLiked = false;
 			
 			if (typeof post.msgTimestamp === "string") {
 				post.msgTimestamp = new Date(post.msgTimestamp);
@@ -1119,6 +1660,7 @@ EMAIL_INPUT = 1;
 				
 				if (post.parentMsgId === 0) {
 					app.topLevelPostsByIndex[app.topLevelPostsByIndex.length] = post;
+					post.indentLevel = 0;
 				} else {
 					post.hasParent = true;
 					parentPost = app.postsById[post.parentMsgId];
@@ -1128,6 +1670,7 @@ EMAIL_INPUT = 1;
 					} // end if
 					
 					post.parentPost = parentPost;
+					post.indentLevel = parentPost.indentLevel + 1;
 					
 					if (typeof parentPost.repliesById[post.msgId] === "undefined") {
 						nReplies = parentPost.repliesByIndex.length;
@@ -1197,14 +1740,38 @@ EMAIL_INPUT = 1;
 	
 	
 	
+	
+	
    /***************************************************************
 	  save a top-level post or a Reply to db via Ajax
 	***************************************************************/
-	function savePost(nParentMsgId, siPostValue) {
+	function savePost(nParentMsgId, siPostValue, txtCtrl) {
+		var sInfo = "You need to be logged in before you can post a message.";
+		var parentMsg;
+		
+
+	//	debugger;
+		
+		if (nParentMsgId > 0) {
+			parentMsg = app.postsById[nParentMsgId];
+		} // end if	
+		
 		if (app.currentUserId === 0) {
-			showLogonPanel("You need to be logged in before you can post a message.");  // got to be logged in first!
+			if (nParentMsgId > 0) {
+				sInfo = "You need to be logged in first before you can post a comment.";
+				
+				if (parentMsg.indentLevel > 1) {
+					sInfo = "You need to be logged in first before you can reply to a comment.";
+				} // end if
+				
+			} // end if
+			
+			showLogonPanel(sInfo);  // got to be logged in first!
 			return;
+			
 		} // end if
+		
+	
 		
 		var wrk = makeAJAXWorkObj();
 		var sURL = "./ajax/savePost.php";
@@ -1213,57 +1780,102 @@ EMAIL_INPUT = 1;
 		var sPostValue = newPost.value;
 		var post;
 		var aNewPosts = [];
+		var sInfo;
+		var commentCntr;
+		var sCntrId = "msgComments";
 		
 		// for handling replies which will get value from some different DOM element.
 		if (typeof siPostValue !== "undefined") {
 			sPostValue = siPostValue;
 		} // end if
 		
-		newPost.value = ""; //clear out text box
 		
-		post = createNewPostObj(sPostValue);
+		
+		
+		post = createNewPostObj(sPostValue, nParentMsgId);
 		
 		app.postsByIndex.unshift(post); // add to beginning of array
 		
 		
 		if (nParentMsgId === 0) {
+			newPost.value = ""; //clear out text box for wall message post
+			newPost.focus();
+			postBtn.style.display = "none"; // hide post button
 			app.topLevelPostsByIndex.unshift(post); // add to beginning of array	
-		} // end if
-		
-		aNewPosts[0] = post;
+			aNewPosts[0] = post;
 
-		updateWallPostsDisplay(aNewPosts);
+			updateWallPostsDisplay(aNewPosts);
+			sInfo = "Posting message to Wall...";
+		} else {
+			txtCtrl.value = "";
+			
+			if (parentMsg.indentLevel > 0) {
+				sCntrId = "postReplies";
+			} // end if
+			
+			commentCntr = getDomEl(sCntrId, parentMsg.msgId);
+			commentCntr.innerHTML = genPostReplyMarkup(parentMsg); // update GUI with changes
+						
+			sInfo = "Adding Comment to Post...";
+			
+			if (parentMsg.indentLevel > 1) {
+				sInfo = "Adding a Reply to Comment...";
+				parentMsg.repliesExpanded = true;
+			} // end if
+		} // end if/else
+				
 		
-		showStatusMsg("Posting message to Wall...");
+		showStatusMsg(sInfo);
 		
 		post.parentMsgId = nParentMsgId;
 		wrk.beginningOfAnAJAXTransactionForURL(sURL);
 		wrk.addPostFieldValueForInt("excludeUserId", app.currentUserId);
 		wrk.addPostFieldValueForString("lastQuery", app.lastWallMsgQry);
 		wrk.addPostFieldValueForInt("tmpMsgId", post.msgId);
-		wrk.addPostFieldValueForInt("parentMsgId", post.parentMsgId);		
+		wrk.addPostFieldValueForInt("parentMsgId", post.parentMsgId);	
+		wrk.addPostFieldValueForInt("topLevelMsgId", post.topLevelMsgId);	
 		wrk.addPostFieldValueForString("postContent", post.msgContent);
 				
-		// get ready for another post to be entered by user...
-		newPost.value = "";
-		postBtn.style.display = "none"; // hide post button
-		newPost.focus();
+			
 		
 		wrk.nextDoPostToServerAndThenDo(function(sResult) {
 			var obj = jsonParse(sResult);
 			hideStatusMsg();
 			
 			if (obj.status === "postSuccessful") {
-				post.msgId = obj.newMsgId;
+			
+				// put this (if) condition below in with the idea of using this save
+				// function to update Existing posts not just create new ones
+				if (post.msgId < 0) {
+					post.tmpId = post.msgId;
+					setActualId(post.msgId, obj.newMsgId);  // needs to be done BEFORE assigning post.msgId new value!
+					post.msgId = obj.newMsgId;
+				} // end if
+				
 				post.msgTimestamp = new Date(obj.msgTimestamp);
 				app.postsById[post.msgId] = post;
-					
+				
+				if (nParentMsgId > 0) {
+					parentMsg.repliesById[obj.newMsgId] = post;
+				} // end if
 			} else {
+				alert("Problem!");
 			} // end if/else
 			
 		});	 // end of call-back block	
 			
 	} // end of function savePost()
+	
+	
+	
+   /***************************************************************   
+   
+   		see: getActualId()   
+	***************************************************************/	
+	function setActualId(nTempId, nActualId) {
+		app.idMapping[nTempId] = nActualId;
+	} // end of function setActualId()   
+	
 	
 	
 	
@@ -1431,6 +2043,15 @@ EMAIL_INPUT = 1;
 	
 	
 	
+   /***************************************************************
+      Filter posts in wall to show only the posts for a specific
+      user.
+	***************************************************************/	
+	function showUsersPosts(nUserId) {
+	} // end of function showUsersPosts()
+	
+	
+	
 	
    /***************************************************************
 	***************************************************************/
@@ -1541,6 +2162,53 @@ EMAIL_INPUT = 1;
 			
 		});	 // end of call-back block	
 	} // end of function signUp()
+	
+	
+	
+	
+	
+   /****************************************************************
+   	   start a reply to a comment or to another reply...
+   	   
+	****************************************************************/ 		
+	function startAReplyTo(nMsgId) {
+		var txtReply = $("#txtReply"+nMsgId)[0];
+		var postReplies;
+		var li;
+		var s = [];
+		var usr;
+		var sUserImagePath;
+		
+		sUserImagePath = app.defaultUserImagePath;
+		
+		if (app.currentUserId > 0) {
+			usr = app.usersById[app.currentUserId];
+			sUserImagePath = usr.userImagePath;
+		} // end if
+		
+		if (typeof txtReply === "undefined") {
+			postReplies = $("#postReplies"+nMsgId)[0];
+			li = document.createElement("li");
+			
+			s[s.length] = "<table><tr>";
+			s[s.length] = "<td>";
+			s[s.length] = "<img src="+Q+sUserImagePath+Q+"' class='replyUsrImg'>";
+			s[s.length] = "</td>";
+			s[s.length] = "<td><input id='txtReply"+nMsgId+"' ";
+			s[s.length] = "class='txtReply' ";
+			s[s.length] = " onkeyup="+Q+"editComment(this,"+nMsgId+")"+Q+" ";
+			s[s.length] = " onpaste="+Q+"editComment(this,"+nMsgId+")"+Q+" ";
+			s[s.length] = "placeholder='Write a reply...' ";
+			s[s.length] = "></td>";
+			s[s.length] = "</tr><table>";
+			
+			li.innerHTML = s.join("");
+			postReplies.appendChild(li);
+		} // end if
+		
+		txtReply.focus();
+		
+	} // end of function startAReplyTo()
 	
 	
 	
@@ -1731,10 +2399,30 @@ EMAIL_INPUT = 1;
 	
 	
 	
+   /***************************************************************
+	***************************************************************/	
+	function validFirstName(sFirstName) {
+	} // end of function validFirstName()
+	
+	
+	
+	
+	
+   /***************************************************************
+	***************************************************************/	
+	function validLastName(sLastName) {
+	} // end of function validLastName()
 	
 	
    /***************************************************************
 	client side check to see if password value is valid
+	rules:
+	     - has to have at least 6 characters
+	     - cannot have any spaces
+	     - must have at least 4 letters.
+	     - must have at least 1 numeric character.
+	     - must have at least 1 punctuation characer from specified list: !@#$%&*-_+=:.
+	     
 	***************************************************************/
 	function validPwd(sPwd) {
 		var bOk = true;
@@ -1762,6 +2450,17 @@ EMAIL_INPUT = 1;
 		
 		return bOk;
 	} // end of function validPwd()
+	
+	
+	
+	
+  /***************************************************************
+	
+	***************************************************************/	
+	function validUserName() {
+	} // end of function validUserName()
+	
+	
 	
 	
 	

@@ -1,22 +1,100 @@
 <?php 
-	session_start();
-    $dsn = 'mysql:host=localhost;dbname=msgWallDemo;port=8889'; 
+	session_start();  // make sure we have a PHP session going if we don't have one already
+	
+   /**************************************************************************************
+    **************************************************************************************
+    
+      ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      FILE:    pdo_connect.php
+      -----    ---------------
+      
+      This file is included at the beginning of Every php Ajax page. So, that page,
+      will have a handy (db) object to use (all connected up) for any queries/ inserts/
+      updates that it may need to do.
+      
+      It will also setup a PHP session if there isn't one yet.
+      
+      It also contains some convenience functions I've written that I can use on said
+      pages to do various useful things.
+      
+      Github location (Master Branch):
+      
+         https://github.com/OrvilleChomer/PHP-mySQL-Message-Wall/blob/master/pdo_connect.php
+      
+      ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     
+    ************************************************************************************** 
+	**************************************************************************************/
+	
+	
+	// initialize db variables:
+	$sDbType = 'mysql';
+	$sHost = 'localhost';
+	$sDbName = 'msgWallDemo';
+	$sPort = '8889';
+	$sDbUserName = 'root';
+	$sDbPassword = 'root';
+	
+   // $dsn = 'mysql:host=localhost;dbname=msgWallDemo;port=8889'; 
+    $dsn = $sDbType . ':host=' . $sHost . ';dbname=' . $sDbName . ';port=' . $sPort;
+
 
    /*******************************************************************************
-      note: when using the "global" key word, once cannot do a value assignment on the
-            same line!
+      note: when using the "global" key word, one cannot do a value assignment on the
+            same line!   Silly PHP!
 	*******************************************************************************/
 	global $sInvitationCodes;
 	global $sIpAddress;
     global $db; 
     
     
+   /*******************************************************************************
+                      INVITATION CODES:
+                      -----------------
+                      
+     Comma delimited list of invitation codes you want for your site.
+     If this variable has one or more invitation codes set in it, when a
+     user signs up they will have to provide an invitation code that matches one
+     of the codes in this list.
+     
+     Blank it out? No invitation code is required!
+     
+     if this variable is set to: 'blue,monday'
+     then a user signing up will find that the word 'blue' or the word 'monday'
+     will work as an invitation code.
+     
+     Changing this variable's value will not affect any users who signed up with
+     it previously!
+     
+    *******************************************************************************/
     $sInvitationCodes = 'blue,monday';
-    $db = new PDO ( $dsn, "root", "root"); 
-    $sIpAddress = $_SERVER['REMOTE_ADDR'];  // best version of user's IP Address
+    
+    
+    
     
     
    /*******************************************************************************
+                      CONNECT TO OUR MYSQL DB:
+                      ------------------------
+                     
+      Connects to database and places connection in global $db variable. 
+    *******************************************************************************/    
+    $db = new PDO ( $dsn, $sDbUserName, $sDbPassword); 
+    
+    // comment out line below for production
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    
+    $sIpAddress = $_SERVER['REMOTE_ADDR'];  // best version of user's IP Address
+    
+    
+    
+    
+    
+   /*******************************************************************************
+      Can call this when building SQL that needs to output a value of a Date/Time
+      column making it into a nicely formatted string value which can be easily
+      outputted in a JSON string!
     *******************************************************************************/
     function dtFld($sFieldName, $sAlias) {
     	$sq = "'";
@@ -27,9 +105,20 @@
     
     
     
-   /*******************************************************************************
+    
+    
+    
+   /**************************************************************************************
       logging of system events (at very least)
-    *******************************************************************************/
+      
+      found out about PHP session id from:
+      https://stackoverflow.com/questions/21302733/how-can-i-get-session-id-in-php-and-show-it
+      
+      Page on my Github wiki about the eventLog table:
+      
+         https://github.com/OrvilleChomer/PHP-mySQL-Message-Wall/wiki/eventLog-Table
+         
+    **************************************************************************************/
     function logEvent($sEventType, $sEventSubject, $sEventDetails, $nAlertLevel) {
     	$db = $GLOBALS['db'];
     	$sIpAddress = $GLOBALS['sIpAddress'];
@@ -43,21 +132,25 @@
     	$sql = $sql . '   eventType,';
     	$sql = $sql . '   eventSubject,';
     	$sql = $sql . '   eventDetails,';
-    	$sql = $sql . '   eventTimestamp,';
+    	$sql = $sql . '   eventTimestamp,';  
     	$sql = $sql . '   userId,';
     	$sql = $sql . '   ipAddress,';
-    	$sql = $sql . '   alertLevel ';
+    	$sql = $sql . '   alertLevel, ';
+    	$sql = $sql . '   phpSessionId ';
     	$sql = $sql . ') VALUES(';
     	$sql = $sql . '   :eventType,';
     	$sql = $sql . '   :eventSubject,';
     	$sql = $sql . '   :eventDetails,';
-    	$sql = $sql . '   NOW(),';
+    	$sql = $sql . '   NOW(),';   // Database's System Date/Time to put into eventTimestamp column
     	$sql = $sql . '   :userId,';
     	$sql = $sql . '   :ipAddress,';
-    	$sql = $sql . '   :alertLevel ';
+    	$sql = $sql . '   :alertLevel, ';
+    	$sql = $sql . '   :phpSessionId ';
     	$sql = $sql . ')';
     	
     	$stmt = $db->prepare($sql);
+    	
+    	$sSessionId = session_id() . '';
     	
     	$stmt->bindParam(':eventType', $sEventType);
     	$stmt->bindParam(':eventSubject', $sEventSubject);
@@ -65,6 +158,7 @@
     	$stmt->bindParam(':userId', $nUserId, PDO::PARAM_INT);
     	$stmt->bindParam(':ipAddress', $sIpAddress);
     	$stmt->bindParam(':alertLevel', $nAlertLevel, PDO::PARAM_INT);
+    	$stmt->bindParam(':phpSessionId', $sSessionId);
     	
     	$stmt->execute();	
     	
@@ -111,6 +205,9 @@
     
     
    /*******************************************************************************
+      Used to escape out values in a string so that the value can be safely
+      placed in a JSON string without causing errors and end up being
+      the right value for a property when the JavaScript client does a JSON.parse()
     *******************************************************************************/
     function jsonStrValue($sInput) {
     	$sOutput = $sInput;
@@ -129,7 +226,7 @@
     } // end of function jsonStrValue()
     
     
-    /**
+    /********************************************************************************
 	 * Generate a random string, using a cryptographically secure 
 	 * pseudorandom number generator (random_int)
 	 * 
@@ -140,7 +237,7 @@
 	 * @param string $keyspace A string of all possible characters
 	 *                         to select from
 	 * @return string
-	 */
+	 ********************************************************************************/
 	function random_str($length, $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
 	{
 		$pieces = [];

@@ -100,8 +100,9 @@ a:VISITED {
 
 .usrLstCntr {
 	position:relative;
-	top:35px;
-	left:0;
+	top:40px;
+	left:0px;
+	
 } 
 
 .usrPicCntr {
@@ -222,12 +223,19 @@ a:VISITED {
 }
 
 
+.msgSections {
+	margin:0px;
+	padding:0px;
+	list-style-type:none;
+}
 
+.msgSection {
+	margin-top:0px;
+	padding-top:0px;
+}
 
 .msgCntr {
-	position:relative;
-	left:0;
-	top:0;
+
 	width:510px;
 	min-height:100px;
 	background-color:white;
@@ -237,6 +245,160 @@ a:VISITED {
 	border-radius:5px;
 	margin-bottom:8px;
 }
+
+
+.msgHdrCntr {
+	margin-top:0px;
+	padding-top:0px;
+	width:510px;
+	height:80px;
+} 
+
+.msgHdrCntr2 {
+	position:relative;
+	margin-top:0px;
+	top:0px;
+	left:0px;
+	width:510px;
+	height:80px;
+}
+
+.msgCountInfo {
+
+	min-height:40px;
+} 
+
+
+.msgLikeAndCountSummary {
+	width:488px;
+	border-top:solid gray 1px;
+	min-height:40px;
+	position:relative;
+	top:0px;
+	left:0px;
+	margin-left:10px;
+} 
+
+
+.postRepliesSum1 {
+	cursor:pointer;
+	color:#375a97;
+	font-size:9.5pt;
+} 
+
+.likeCommentShareBtn {
+	height:29px;
+	margin-top:5px;
+	cursor:pointer;
+}
+
+
+.commentContainer {
+	border-top:solid gray 1px;
+	min-height:50px;
+}
+
+.commentsLst {
+	list-style-type:none;
+	margin:0px;
+	padding:0;
+}
+
+.commentInputCntr {
+	position:relative;
+	top:0px;
+	left:0px;
+}
+
+.commentUsrImg {
+	position:absolute;
+	top:7px;
+	left:5px;
+	height:28px;
+	width:28px;
+	border:solid silver 1px;
+	border-radius:14px;
+}
+
+.commentUsrImg2 {
+	height:28px;
+	width:28px;
+	border:solid silver 1px;
+	border-radius:14px;
+	margin-top:4px;
+	box-sizing: border-box;
+}
+
+
+.replyUsrImg {
+	height:14px;
+	width:14px;
+	border:solid silver 1px;
+	border-radius:7px;
+	margin-top:4px;
+	box-sizing: border-box;
+}
+
+
+.replyUsrImg2 {
+	height:14px;
+	width:14px;
+	border:solid silver 1px;
+	border-radius:7px;
+	margin-top:11px;
+	box-sizing: border-box;
+}
+
+.lnkOnly {
+	cursor:pointer;
+}
+
+
+.commentInput {
+	font-size:9.5pt;
+	color:black;
+	min-height:25px;
+	border:solid gray 1px;
+	border-radius:15px;
+	background-color:#e9ebee;
+	padding-left:10px;
+	width:430px;
+	margin-top:3px;
+}
+
+
+
+.txtReply {
+	font-size:9.5pt;
+	color:black;
+	min-height:25px;
+	border:solid gray 1px;
+	border-radius:15px;
+	background-color:#e9ebee;
+	padding-left:10px;
+	width:400px;
+	margin-top:3px;
+}
+
+
+.commentMsgCntr {
+	min-height:25px;
+} 
+
+.commentMsg {
+	background-color:#e9ebee;
+	border-radius:15px;
+	min-height:25px;
+	min-width:200px;
+	box-sizing: border-box;
+	padding-left:12px;
+	padding-right:12px;
+	padding-top:4px;
+	margin-top:6px;
+	font-size:9.5pt;
+	margin-top:5px;
+}
+
 
 .hr1 {
 	position:absolute;
@@ -278,11 +440,22 @@ a:VISITED {
 }
 
 
+.smallLink {
+	font-size:9pt;
+	color:#375a97;
+	cursor:pointer;
+}
+
+
 .userNameTitle {
 	font-size:11pt;
 	font-weight:bold;
 	color:#375a97;
 	cursor:pointer;
+}
+
+.commentUserName {
+	font-size:10pt;
 }
 
 .userNameTitle2 {
@@ -302,17 +475,36 @@ a:VISITED {
 	color:#606770;
 }
 
+.postedAtInfo2 {
+	font-size:9pt;
+	color:#606770;
+}
+
 .postContent {
-	position:absolute;
-	left:55px;
-	top:50px;
 	width:440px;
-	min-height:100px;
+	min-height:40px;
 	font-size:10pt;
-	float:left;
 	text-align:left;
+	padding-left:12px;
 	
 }
+
+
+.commentReplies {
+	min-height:1px;
+	margin:0;
+	padding-left:30px;
+	width:300px;
+	box-sizing: border-box;
+}
+
+
+ul.postReplies {
+	margin:0;
+	padding-left:16px;
+	list-style-type:none;
+}
+
 
 #tint {
 	position:absolute;
