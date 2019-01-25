@@ -1,17 +1,17 @@
 
 	var app = {};
-	var Q = '"';
+	const  Q = '"';
 	
-	var INPUT_OK = 0;
-	var EMAIL_INPUT = 1;
-	var PWD_INPUT = 2;
-	var EMAIL_INPUT2 = 3;
-	var PWD_INPUT2 = 4;
-	var FIRSTNAME_INPUT = 5;
-	var LASTNAME_INPUT = 6;
-	var INVCODE_INPUT = 7;
+	const  INPUT_OK = 0;
+	const  EMAIL_INPUT = 1;
+	const  PWD_INPUT = 2;
+	const  EMAIL_INPUT2 = 3;
+	const  PWD_INPUT2 = 4;
+	const  FIRSTNAME_INPUT = 5;
+	const  LASTNAME_INPUT = 6;
+	const  INVCODE_INPUT = 7;
 		
-	var postCheck;
+	var  postCheck;
 	
 	
 
@@ -22,13 +22,16 @@
    /***************************************************************
        run when the onload event fires for the page:
 	***************************************************************/
-	function pageSetup() {
+	function pageSetup(biMobileFlg) {
 		var newPost = $("#newPost")[0];
 		var usrStatusPnl = $("#usrStatusPnl")[0];
 		var logonEmailAdr = $("#logonEmailAdr")[0];
+		var usrAgnt = $("#usrAgnt")[0];
 		
 		postCheck = $("#postCheck")[0]; // done at global level to slightly improve performance
 		
+		
+		// initialize "app" values:
 		app.CR_key = 13;
 		app.contentWidth = 850;
 		app.currentOpenDialog = "";
@@ -36,25 +39,33 @@
 		app.currentUserObj = undefined;
 		app.currentUserWallId = 0;   // which user's wall are we looking at?
 		app.defaultUserImagePath = "./userImages/noPic.png";
+		app.desktopApp = !biMobileFlg;
+		app.displayIdNums = false; // used for debugging (set to true)
 		app.hdrHeight = 42;
 		app.idMapping = [];  // lookup maps temp id to final id
 		app.lastWallMsgQry = "01/01/1900 01:22:00"; // fallback date
 		app.logonEmail = "";
 		app.logonHashCode = "";
 		app.logoWidth = 32;		
-		app.msgsPerPage = 10;		
+		app.mobileApp = biMobileFlg;
+		app.msgsPerPage = 10;	
+		app.msgUsersByIndex = [];  // data a user has about a post
+		app.msgUsersById = [];	
 		app.panelWidth = 500;
 		app.panelHeight = 300;
+		app.lastScrollDiff = 0; // not initialized yet
 		app.lastTmpId = 0;
 		app.postsByIndex = [];
 		app.postsById = [];
 		app.postDataLoaded = false;
+		app.prevScrollTopValue = -1; // not initialized yet
 		app.processingInput = false;
 		app.requireInvCode = true;
 		app.resizing = false;
 		app.statusMsgWidth = 500;
 		app.titleSpacing = 18;
 		app.topLevelPostsByIndex = [];
+		app.userAgentValue = usrAgnt.innerHTML;
 		app.usersByIndex = [];
 		app.usersById = [];
 		app.userDataLoaded = false;
@@ -70,7 +81,7 @@
 		} // end if
 		
 		
-		if (app.currentUserId === 0) {
+		if (app.currentUserId === 0 && typeof usrStatusPnl !== "undefined") {
 			usrStatusPnl.innerHTML = getLogonLinkMarkup();
 		} // end if
 		
@@ -104,13 +115,31 @@
 		var statusMsg = $("#statusMsg")[0];
 		var logOffPanel = $("#logOffPanel")[0];
 		var msgCol =  $("#msgCol")[0];
+		var wallInfo1 =  $("#wallInfo1")[0];
+		var siteTitle =  $("#siteTitle")[0];
 		var w = window.innerWidth;
 		var h = window.innerHeight;
 		var nTop,nLeft,nHeight;
 		var nHdrHeight = 42;
+		var nMgn;
 		if (app.resizing) return; // prevent unwanted cascading events
 		
 		app.resizing = true;
+		
+		nMgn = Math.floor(w / 10.0);
+		
+		if (app.contentWidth > w) {			
+			app.contentWidth  = w - (nMgn * 2);
+			siteTitle.innerHTML = "Message Wall Demo";
+			siteTitle.style.fontSize = "16pt";
+			siteTitle.style.fontWeight = "bold";
+			pgHdr.style.height = "50px";
+			msgWallLogo.style.top = "4px";
+			msgWallLogo.style.height = "42px";
+			msgWallLogo.style.width = "42px";
+			viewPort.style.top = "50px";
+			topLvlPgContent_desktop.style.width = (app.contentWidth)+"px";
+		} // end if
 		
 		pgHdr.style.width = (w)+"px";
 		
@@ -124,6 +153,12 @@
 		
 		tint.style.width = (w)+"px";
 		tint.style.height = (h)+"px";
+		
+		// tmp:
+		wallInfo1.innerHTML = (w)+"px X "+(h)+"px";
+		
+		
+		// centering various popup panels:
 		
 		nLeft = Math.floor((w - app.panelWidth) / 2);
 		logonPanel.style.left = (nLeft)+"px";
@@ -142,7 +177,9 @@
 		logOffPanel.style.left = (nLeft)+"px";
 		logOffPanel.style.top = (nTop)+"px";
 		
-		app.resizing = false;
+		
+		app.resizing = false; // we are all done!
+		
 	} // end of function pageResize()
 	
 	
@@ -166,6 +203,16 @@
 		
 		newComment.focus();
 	} // end of function beginEnteringComment()
+	
+	
+	
+   /***************************************************************
+
+	***************************************************************/	
+	function captureMsgScroll() {
+		if (!app.mobileApp) return;
+
+	} // end of function captureMsgScroll()
 	
 	
 	
@@ -505,6 +552,8 @@
 		post.userId = app.currentUserId;
 		post.msgTimestamp = new Date();
 		post.msgContent = sMsg;		
+		post.msgUsersByIndex = [];   // data that users have about the post
+		post.msgUsersById = [];
 		post.postHeight = 0;
 		post.likeCount = 0;
 		post.youLiked = false;
@@ -515,6 +564,7 @@
 		post.hasParent = false;
 		post.indentLevel = 0;
 		post.repliesExpanded = false;
+		
 		
 		if (typeof niParentMsgId === "number") {
 			if (niParentMsgId > 0) {
@@ -618,27 +668,49 @@
    /***************************************************************
    	   kinda gives a summary of likes and replies for a post
    	   also gives some link options for liking and commenting
+   	   
+   	   
 	***************************************************************/	
 	function genMsgLikesAndCommentsSummaryMarkup(post) {
 		var s=[];
+		var sLikeBtnFileImage = "likeButton.png";
 		
 		s[s.length] = "<li class='msgSection'>";
 			s[s.length] = "<div class='msgLikeAndCountSummary' >";
 			
-			if (post.likeCount > 0 || post.commentCount > 0) {
-				s[s.length] = "<div class='msgCountInfo' ";
-				s[s.length] = "id='lblCommentCount"+post.msgId+"' ";
-				s[s.length] = ">xxx";
-				s[s.length] = "</div>";	//msgCountInfo
-				s[s.length] = " likes";
+			s[s.length] = "<div class='msgCountInfo' "; // have this div every time
+			s[s.length] = "id='msgCountInfo"+post.msgId+"' ";
 			
-				s[s.length] = post.commentCount;
-				s[s.length] = " comments";
+			if (post.likeCount > 0 || post.repliesByIndex.length > 0) {
+				s[s.length] = " style='display:block;' ";
+			} // end if (post.likeCount > 0 || post.commentCount > 0)
+			 
+			s[s.length] = ">"; // end of msgCountInfo opening tag
+			
+			if (post.likeCount > 0 || post.repliesByIndex.length > 0) {
+				s[s.length] = getPostLikeAndCommentInfo(post);
+			} // end if
+			
+			s[s.length] = "</div>";	//msgCountInfo
+			
+			//s[s.length] = " likes";
+			
+				//s[s.length] = post.commentCount;
+				//s[s.length] = " comments";
+			//s[s.length] = "id='lblCommentCount"+post.msgId+"' ";
+			
+			if (post.youLiked) {
+				// you Liked this top-level post so show the "Selected" like button!
+				sLikeBtnFileImage = "likeButtonSel.png";
 			} // end if
 			
 			s[s.length] = "<center>";
 			
-			s[s.length] = "<img class='likeCommentShareBtn' src='./imgs/likeButton.png' ";
+			s[s.length] = "<img class='likeCommentShareBtn' src='./imgs/"+sLikeBtnFileImage+"' ";
+			s[s.length] = "id='likeLnk"+post.msgId+"' ";
+			s[s.length] = "onclick="+Q+"likeUnlike("+post.msgId+")"+Q+" ";
+			
+			
 			s[s.length] = ">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 			
 			s[s.length] = "<img class='likeCommentShareBtn' src='./imgs/commentButton.png' ";
@@ -699,6 +771,9 @@
 					
 				
 					s[s.length] = reply.msgContent;
+					
+					s[s.length] = outputObjId("postsById", "msgId", reply.msgId);
+										
 					s[s.length] = "</div>";
 				
 					s[s.length] = "&nbsp;&nbsp;&nbsp;";
@@ -708,7 +783,7 @@
 					s[s.length] = ">";
 					
 					if (reply.youLiked) {
-						s[s.length] = "unlike";
+						s[s.length] = "<b>like</b>";
 					} else {
 						s[s.length] = "like";
 					} // end if
@@ -857,6 +932,9 @@
 				// actual msg content
 				s[s.length] = "<li class='msgSection'>";
 					s[s.length] = "<div class='postContent'>"+post.msgContent;
+					
+					s[s.length] = outputObjId("postsById", "msgId", post.msgId);
+										
 					s[s.length] = "</div>";
 				s[s.length] = "</li>";
 				
@@ -1166,6 +1244,100 @@
 	} // end of function getJsStack() 
 	
 		
+   /***************************************************************
+      
+	***************************************************************/		
+	function getLikedArray(post) {
+		var a = [];
+		var nMax = post.msgUsersByIndex.length;
+		var n, obj;
+
+		for (n=0;n<nMax;n++) {
+			obj = post.msgUsersByIndex[n];
+			
+			if (obj.dataValueStr === "like") {
+				a[a.length] = obj;
+			} // end if
+		} // next n
+		
+		post.likeCount = a.length;
+		
+		return a;
+	} // end of function getLikedArray()
+		
+		
+		
+		
+   /***************************************************************
+      
+	***************************************************************/		
+	function getLikedList1(post){
+		var s=[];
+		var usr;
+		var nCurrentUserCount = 0;
+		var arr = getLikedArray(post);
+		var msgUsr;
+		var n;
+		var nMax = arr.length;
+		var Q = '"';
+		
+		s[s.length] = "<table cellpadding=0 cellspacing=0 class='largeLikeHoverArea' ";
+		s[s.length] = "onclick="+Q+""+Q+" ";
+		s[s.length] = "><tr valign='middle'>";
+				
+		s[s.length] = "<td><img src='./imgs/likesIcon.png' border='0' width='16' class='likeIcon'></td>";
+		
+		s[s.length] = "<td class='grayText' ";
+		s[s.length] = ">";
+		
+		if (post.youLiked) {			
+			if (post.likeCount > 1) {
+				s[s.length] = "You ";
+				nCurrentUserCount = nCurrentUserCount + 1;
+			} else {
+				usr = app.currentUserObj;
+				s[s.length] = usr.userFullName;
+				nCurrentUserCount = nCurrentUserCount + 1;
+			} // end if/else
+		} // end if
+		
+		if (nCurrentUserCount < 3) {
+			for (n=0;n<nMax;n++) {
+				msgUsr = arr[n];				
+				
+				if (msgUsr.userId !== app.currentUserId) {
+					if (nCurrentUserCount > 1) {
+						s[s.length] = ", ";
+					} // end if
+					
+					if (nCurrentUserCount === nMax) {
+						s[s.length] = "and ";
+					} // end if
+					
+					s[s.length] = msgUsr.usrObj.userFullName;
+					nCurrentUserCount = nCurrentUserCount + 1;
+					
+					if (nCurrentUserCount > 2) {
+						break; // get out of for loop
+					} // end if
+				} // end if
+			} // next n
+		} // end if
+		
+		if (nCurrentUserCount < nMax) {
+			s[s.length] = "and "+(nMax-nCurrentUserCount)+" others";
+		} // end if
+		
+		s[s.length] = "</td>";
+		
+		s[s.length] = "</tr></table>";
+		
+		return s.join("");
+	} // end of function getLikedList1()
+	
+	
+	
+	
 	
    /***************************************************************
       Not to be confused with the hash mark (pound sign)..
@@ -1218,9 +1390,12 @@
 			sMsg = siMsg;
 		} // end if
 		
-		s[s.length] = "<span style='font-size:10pt;'>";
-		s[s.length] = sMsg;
-		s[s.length] = "</span>";
+		if (app.desktopApp) {
+			s[s.length] = "<span style='font-size:10pt;'>";
+			s[s.length] = sMsg;
+			s[s.length] = "</span>";
+		} // end if
+		
 		s[s.length] = "<center>";
 		s[s.length] = "<p>";
 		s[s.length] = "<button class='genericBtn' ";
@@ -1229,11 +1404,17 @@
 		s[s.length] = ">";
 		s[s.length] = "Log In";
 		s[s.length] = "</button>";
-		s[s.length] = "</p>";
-		s[s.length] = "<p>";
-		s[s.length] = "- or -";
-		s[s.length] = "</p>";
-		s[s.length] = "<p>";
+		
+		if (app.desktopApp) {
+			s[s.length] = "</p>";
+			s[s.length] = "<p>";
+			s[s.length] = "- or -";
+			s[s.length] = "</p>";
+			s[s.length] = "<p>";
+		} else {
+			s[s.length] = "&nbsp;&nbsp;";
+		} // end if/else
+		
 		s[s.length] = "<button class='signupBtn' ";
 		s[s.length] = "style='width:80px;' ";		
 		s[s.length] = "onclick="+Q+"showSignUpPanel()"+Q+" ";
@@ -1242,7 +1423,10 @@
 		s[s.length] = "</button>";
 		s[s.length] = "</p>";
 		s[s.length] = "</center>";
-		s[s.length] = getBlurb();
+		
+		if (app.desktopApp) {
+			s[s.length] = getBlurb();
+		} // end if
 		
 		return s.join("");
 	} // end of function getLogonLinkMarkup()
@@ -1305,6 +1489,35 @@
 	
 	
 	
+   /********************************************
+	*********************************************/	
+	function getPostLikeAndCommentInfo(post) {
+		var s=[];
+		
+		s[s.length] = "<table cellpadding=0 cellspacing=0 width='100%'><tr>";
+		s[s.length] = "<td align='left' width='*' nowrap ";
+		s[s.length] = "id='likeLst1-"+post.msgId+"' ";
+		s[s.length] = ">";
+		
+		if (post.likeCount > 0) {			
+			s[s.length] = getLikedList1(post);		
+		} else {
+			s[s.length] = "&nbsp;</td>";
+		} // end if
+		
+		
+		s[s.length] = "<td align='right' nowrap width='120' class='grayText'>";
+		
+		if (post.repliesByIndex.length > 0) {
+			s[s.length] = post.repliesByIndex.length;
+			s[s.length] = " comments";
+		} // end if
+			
+		s[s.length] = "</td></tr></table>";
+		
+		return s.join("");
+	} // end of function getPostLikeAndCommentInfo()
+	
 	
 	
    /********************************************
@@ -1332,9 +1545,6 @@
 						
 			processPostsAndUsers(obj);
 
-			// make sure user can see posts...
-			updateWallPostsDisplay(app.topLevelPostsByIndex);
-			
 			if (typeof bPageStartup !== "undefined") {
 				if (bPageStartup) {
 					if (app.currentUserId > 0) {
@@ -1344,6 +1554,11 @@
 					
 				} // end if
 			} // end if
+			
+			// make sure user can see posts...
+			updateWallPostsDisplay(app.topLevelPostsByIndex);
+			
+			
 			
 			updateWallUserDisplay();
 		});	 // end of call-back block
@@ -1560,29 +1775,87 @@
 	
 	
    /******************************************************************************
+   	  toggle "like" flag on msg for the current user
     ******************************************************************************/	
 	function likeUnlike(nMsgId) {
 		var likeLnk = $("#likeLnk"+nMsgId)[0];
 		var msg = app.postsById[nMsgId];
 		var sInfo = "You need to be logged in before you can un/like a message.";
+		var wrk = makeAJAXWorkObj();
+		var sURL = "./ajax/likeUnlike.php";
+		var likeLst1;
 		
 		if (app.currentUserId === 0) {
 			showLogonPanel(sInfo);  // got to be logged in first!
 			return;
 		} // end if
 		
+		
 		if (!msg.youLiked) {
-			likeLnk.innerHTML = "unlike";
+			if (msg.parentMsgId === 0) {
+				likeLnk.src= "./imgs/likeButtonSel.png";
+			} else {
+				likeLnk.innerHTML = "<b>like</b>";  // make the word "like" be bold
+			} // end if/else
+			
 			msg.youLiked = true;
 			msg.likeCount = msg.likeCount + 1;
 		} else {
-			likeLnk.innerHTML = "like";
+		
+			if (msg.parentMsgId === 0) {
+				likeLnk.src= "./imgs/likeButton.png";
+			} else {
+				likeLnk.innerHTML = "like";
+			} // end if/else
+			
 			msg.youLiked = false;
 			msg.likeCount = msg.likeCount - 1;
 		} // end if/else
 		
+		
+		if (msg.parentMsgId === 0) {
+			likeLst1 = $("#likeLst1-"+nMsgId)[0];
+			likeLst1.innerHTML = getLikedList1(msg);
+		} // end if
+		
+		wrk.beginningOfAnAJAXTransactionForURL(sURL);
+		wrk.addPostFieldValueForInt("excludeUserId", app.currentUserId);
+		wrk.addPostFieldValueForString("lastQuery", app.lastWallMsgQry);
+		wrk.addPostFieldValueForInt("userId", app.currentUserId);
+		wrk.addPostFieldValueForInt("msgId", nMsgId);
+						
+		wrk.nextDoPostToServerAndThenDo(function(sResult) {
+			var obj = jsonParse(sResult);
+			
+			processMsgUserDataItem(obj.msgUsrObj);
+		});	 // end of call-back block	
+		
 	} // end of function likeUnlike()
 	
+	
+	
+	
+	
+   /******************************************************************************
+   	  create some HTML markup to display a little label showing an Id #
+   	  ... with the option to click for more stuff!
+   	  ... do it that is IF the app.displayIdNums is set to true!
+    ******************************************************************************/		
+	function outputObjId(sAppDictName, sIdPropName, nId) {
+		var s=[];
+		var Q = '"';
+		
+		if (app.displayIdNums) {
+			s[s.length] = "<br><div class='idDisp' ";
+			s[s.length] = "title="+Q;
+			s[s.length] = "click to check object's values";
+			s[s.length] = Q;
+			s[s.length] = "onclick="+Q+"showObjInfo('"+sAppDictName+"', "+nId+")"+Q+" ";
+			s[s.length] = ">&nbsp;&nbsp;&nbsp;"+sIdPropName+": ("+nId+")</div>";
+		} // end if
+		
+		return s.join("");
+	} // end of function outputObjId()
 	
 	
 	
@@ -1652,6 +1925,8 @@
 			if (typeof post.repliesByIndex === "undefined") {
 				post.repliesByIndex = [];
 				post.repliesById = [];
+				post.msgUsersByIndex = [];   // data that users have about the post
+				post.msgUsersById = [];
 				post.hasParent = false;				
 			} // end if
 			
@@ -1701,14 +1976,89 @@
 		} // end if
 		
 		
-		if (typeof obj.latestPosts !== "") {
+		if (typeof obj.latestPosts !== "undefined") {
 			processPosts(obj.latestPosts);
 		} // end if
 		
-		if (typeof obj.latestUsers !== "") {
+		if (typeof obj.latestUsers !== "undefined") {
 			processUsers(obj.latestUsers);
 		} // end if
+		
+		if (typeof obj.latestMsgUserData !== "undefined") {
+			processMsgUserData(obj.latestMsgUserData);
+		} // end if
+		
 	} // end of function processPostsAndUsers()
+	
+	
+	
+   /***************************************************************
+		process individual msgUsr object
+	***************************************************************/	
+	function processMsgUserDataItem(msgUsr) {
+		var msg,usr,msgUsr2;
+		
+		const DATATYPE_LIKE = 0;
+
+		if (typeof app.msgUsersById[msgUsr.msgUserId] === "undefined") {
+			app.msgUsersByIndex[app.msgUsersByIndex.length] = msgUsr;
+		} // end if
+		
+		app.msgUsersById[msgUsr.msgUserId] = msgUsr.msgUserId;
+		
+		msg = app.postsById[msgUsr.msgId];
+		usr = app.usersById[msgUsr.userId];
+		
+		if (typeof msg.msgUsersById[msgUsr.msgUserId] === "undefined") {
+			msgUsr.idx = msg.msgUsersByIndex.length;
+			msg.msgUsersByIndex[msg.msgUsersByIndex.length] = msgUsr;
+			msg.msgUsersById[msgUsr.msgUserId] = msgUsr;
+		} else {
+			msgUsr2 = msg.msgUsersById[msgUsr.msgUserId];
+			msgUsr2.dataValueStr = msgUsr.dataValueStr;
+		} // end if
+		
+		
+		// convenience properties:
+		msgUsr.msgObj = msg;
+		msgUsr.usrObj = usr;
+		
+		if (typeof msgUsr.createDate === "string") {
+			msgUsr.createDate = new Date(msgUsr.createDate);
+		} // end if
+		
+		
+		if (typeof msgUsr.updateDate === "string") {
+			msgUsr.updateDate = new Date(msgUsr.updateDate);
+		} // end if
+		
+		if (msgUsr.userId === app.currentUserId && msgUsr.dataType === DATATYPE_LIKE) {
+			if (msgUsr.dataValueStr === "like") {
+				msg.youLiked = true;
+			} else {
+				msg.youLiked = false;
+			} // end if/else
+		} // end if
+		
+	} // end of function processMsgUserDataItem()
+	
+	
+	
+	
+   /***************************************************************
+		process latest user information about posts downloaded via Ajax.
+	***************************************************************/	
+	function processMsgUserData(latestMsgUserData) {
+		var nMax = latestMsgUserData.length;
+		var msgUsr,usr,msg;
+		var n;
+		
+		for (n=0;n<nMax;n++) {
+			msgUsr = latestMsgUserData[n];
+			processMsgUserDataItem(msgUsr);
+		} // next n
+	} // end of function processMsgUserData()
+	
 	
 	
 	
@@ -1748,7 +2098,7 @@
 	function savePost(nParentMsgId, siPostValue, txtCtrl) {
 		var sInfo = "You need to be logged in before you can post a message.";
 		var parentMsg;
-		
+		var likeLst1;
 
 	//	debugger;
 		
@@ -1813,6 +2163,11 @@
 				sCntrId = "postReplies";
 			} // end if
 			
+	/*		if (post.indentLevel > 0) {			
+				parentMsg.repliesByIndex[parentMsg.repliesByIndex.length] = post;
+				parentMsg.repliesById[post.msgId] = post;
+			} // end if  */
+			
 			commentCntr = getDomEl(sCntrId, parentMsg.msgId);
 			commentCntr.innerHTML = genPostReplyMarkup(parentMsg); // update GUI with changes
 						
@@ -1835,8 +2190,7 @@
 		wrk.addPostFieldValueForInt("parentMsgId", post.parentMsgId);	
 		wrk.addPostFieldValueForInt("topLevelMsgId", post.topLevelMsgId);	
 		wrk.addPostFieldValueForString("postContent", post.msgContent);
-				
-			
+						
 		
 		wrk.nextDoPostToServerAndThenDo(function(sResult) {
 			var obj = jsonParse(sResult);
@@ -1857,6 +2211,11 @@
 				
 				if (nParentMsgId > 0) {
 					parentMsg.repliesById[obj.newMsgId] = post;
+				} // end if
+				
+				if (post.indentLevel === 1) {
+					likeLst1 = $("#likeLst1-"+nMsgId)[0];
+					likeLst1.innerHTML = getLikedList1(post);
 				} // end if
 			} else {
 				alert("Problem!");
@@ -1976,6 +2335,22 @@
 	} // end of function showLogonPanel()
 	
 	
+   /******************************************************************************
+   		used for debugging
+   		see: outputObjId()
+    ******************************************************************************/		
+	function showObjInfo(sAppDictName, nId) {
+		var dict = app[sAppDictName];
+		var obj = dict[nId];
+		var a = app;   // make local variable version (easier to find in debugger)!
+		
+		/* check out the values of the [obj] object... */
+		debugger;
+	} // end of function showObjInfo()
+	
+	
+	
+		
 	
    /******************************************************************************
     ******************************************************************************/		

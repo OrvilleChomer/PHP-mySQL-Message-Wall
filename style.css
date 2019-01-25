@@ -1,56 +1,508 @@
+/*****************************************************************
+   Orville's PHP Message Wall Demo Style Sheet
+   fully commented and formatted.
+   
+   The Style of this site is supposed to be Facebook-like.
+   There are many similarities. But there are plenty of differences too!
+   
+   Selectors appear in this file in alphabetical order.
+   
+   CSS Selector Table of Contents:
+   ===============================
+   
+    a                          .mobileUserStatusPnl        #tint
+    a:VISITED                  #msgCol                     #topLvlPgContent_desktop
+    .activeTab                 .msgColLst                  .txtReply
+    body                       .msgCountInfo               .userImg1
+    .cancelBtn                 .msgCntr                    .userNameTitle
+    .cancelBtnLogon            .msgHdrCntr                 .userNameTitle2
+    .commentContainer          .msgLikeAndCountSummary     #userProfilePanel
+    .commentInput              #msgs                       #usrFirstName
+    .commentInputCntr          .msgSection                 #usrLastName
+    .commentsLst               .msgSections                .usrLstCntr
+    .commentMsg                #msgWallLogo                .usrPic
+    .commentMsgCntr            #newPost                    .usrPicCntr
+    .commentReplies            .notAUser                   .usrPicName
+    .commentUserName           .peopleIcon1                .userSubmitBtn
+    .commentUsrImg             #pgHdr                      .userSubmitBtnDisabled
+    .commentUsrImg2            #postBtn                    .userSubmitBtnLogon
+    .genericBtn                #postCheck                  #viewPort
+    .hdr1                      .postContent                #wallInfo1
+    .hdr2                      .postedAtInfo               .wallUsrTitle
+    .hr1                       .postedAtInfo2              .wallUsrTitleCntr
+    .inactiveTab               .postElipses
+    #invCode                   #postMsg
+    #lblEmailAdr               ul.postReplies
+    #lblEmailAdr2              .postRepliesSum1
+    #lblEmailAdr2c             .postUserName
+    #lblInvitationCode         #problems
+    .lblLogoff                 #pwd
+    #lblPassword               #pwd2
+    #lblPassword2              #pwd2_confirm
+    #lblPassword2c             .replyUsrImg
+    #lblUsrFirstName           .replyUsrImg2
+    #lblUsrLastName            .sidePanel_desktop
+    #leftSideCol               .sidePanelList
+    .likeCommentShareBtn       .signupBtn
+    .liMsg                     #signUpMsg
+    .lnkOnly                   .signupTab
+    .loginTab                  #signUpView
+    #logOffPanel               #siteTitle
+    #logonEmailAdr             .smallLink
+    #logonEmailAdr2            .smlHdr
+    #logonEmailAdr2_confirm    .specLnk
+    #logonInfoMsg              #statusMsg
+    #logonPanel                .tabLeftSpacing
+    #logonView                 .tabRightSpacing
+    
+    
+    ------------------------------------------------------------------------------------
+    
+    
+   Overall {Page Layout} Related Selectors:
+   ======================================== 
+    #leftSideCol     contains left column contents (when not running mobile) (a DIV)
+    #msgCol          main column that contains all the page's main content (a DIV)
+    .msgColLst       child of msgCol.  Applied to UL tag.
+    #pgHdr           contains the page's orange header at the page top
+    .sidePanelList   child of leftSideCol.  Applied to UL tag.
+    
+    #topLvlPgContent_desktop
+                     (a DIV).  child of #viewPort
+                     Contains all the page's content constrained to a specific Width.
+                     style.left is set on this element when the resize event fires to
+                     position it so that it is centered on the page.
+    
+    #usrBanner       will contain user's image banner (if view is just the user's top level posts)
+    #viewPort        contains all the page Content below the header and the banner
+    
+   
+   
+   Button Related Selectors:
+   =========================
+    .cancelBtn
+    .cancelBtnLogon   
+    .genericBtn
+    .userSubmitBtn
+    .userSubmitBtnDisabled
+    .userSubmitBtnLogon
+    
+    
+   "Tab" Related Selectors:
+   ======================
+    .activeTab 
+    .inactiveTab
+    .loginTab  
+    .signupTab 
+    .tabLeftSpacing
+    .tabRightSpacing
+    
+    
+   "Caption/Label" Related Selectors:
+   ==================================
+    #lblEmailAdr 
+    #lblEmailAdr2
+    #lblEmailAdr2c
+    #lblInvitationCode
+    .lblLogoff 
+    #lblPassword
+    #lblPassword2
+    #lblPassword2c
+    #lblUsrFirstName
+    #lblUsrLastName
+    
+    
+    
+   Text Input Field Related Selectors:
+   ===================================
+   
+   Image Related Selectors:
+   ========================
+    .commentUsrImg 
+    .commentUsrImg2   
+    #msgWallLogo
+    .peopleIcon1  
+    .postElipses
+    .replyUsrImg
+    .replyUsrImg2
+    .userImg1
+    .usrPic
+    
+    
+   Unordered List (UL) Related Selectors:
+   =================================
+    .msgColLst
+    ul.postReplies
+    .sidePanelList
+    
+    
+    
+   List Item (LI) Related Selectors:
+   ============================
+    .liMsg
+    
+   
+   Popup Panel Related Selectors:
+   ==============================
+    #logonPanel
+   
+   Top-Level User Post Related Selectors:
+   ======================================
+   
+   Post Comments Related Selectors:
+   ================================
+   
+   Comment Replies Related Selectors:
+   ==================================
+ *****************************************************************/
+ 
+
+
+/*   Universal CSS Reset  */
+* {
+   
+   
+}
+
+
+/*     #375a97  is the color of hyperlinks inside of Facebook.     */
+a {
+	color:#375a97;
+}
+
+
+/*     #375a97  is the color of hyperlinks inside of Facebook.     */
+a:VISITED {
+	color:#375a97;
+}
+ 
+.activeTab {
+	position:absolute;
+	top:4px;	
+	height:26px;
+	width:100px;
+	background-color:#ffcc99;
+	border-left:solid gray 1px;
+	border-top:solid gray 1px;
+	border-right:solid gray 1px;
+	border-radius: 3px 3px 0px 0px;
+	text-align:center;
+	box-sizing: border-box;
+	padding-top:2px;
+	
+}
+
+ 
 body {
-	margin:0;
-	padding:0;
-	background-color:#E9EBEE;
+	margin:0px;
+	padding:0px;
+	position:fixed;
+	
+	/* background color is the same light gray background color that Facebook's pages have. */
+	background-color:#e9ebee;
 	box-sizing: border-box;
 	overflow:hidden;
 	font-family:Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
-a {
-	color:#375a97;
-}
 
-a:VISITED {
-	color:#375a97;
-}
-
-#pgHdr {
+.cancelBtn {
+	background-color:#E9EBEE;
+	border:solid gray 2px;
+	color:black;
+	font-size:15pt;
 	position:absolute;
-	top:0; left:0;
-	height:42px;
-	background-color:orange;
-}
-
-#msgWallLogo {
-	width:35px;
-	height:35px;
-	position:absolute;
-	top:3px;
-	border-radius:3px;
-}
-
-#siteTitle {
-	position:absolute;
-	top:6px;
-	font-size:19pt;
+	width:100px;
+	height:40px;
+	border-radius:5px;
+	cursor:pointer;
 }
 
 
-#viewPort {
-	position:absolute;
-	top:42px; 
+.cancelBtnLogon {
+	left:12px;
+	top:225px;
+	
+}
+
+
+
+.commentContainer {
+	border-top:solid gray 1px;
+	min-height:50px;
+}
+
+
+.commentInput {
+	font-size:9.5pt;
+	color:black;
+	min-height:25px;
+	border:solid gray 1px;
+	border-radius:15px;
+	background-color:#e9ebee;
+	padding-left:10px;
+	width:430px;
+	margin-top:3px;
+}
+
+
+
+.commentInputCntr {
+	position:relative;
+	top:0px;
 	left:0px;
-	overflow:hidden;
 }
 
-#topLvlPgContent_desktop {
-	position:absolute;
-	top:0;
-	width:850px;
-	min-height:200px;
-	overflow:hidden;
+
+
+.commentsLst {
+	list-style-type:none;
+	margin:0px;
+	padding:0;
 }
+
+
+.commentMsg {
+	background-color:#e9ebee;
+	border-radius:15px;
+	min-height:25px;
+	min-width:200px;
+	box-sizing: border-box;
+	padding-left:12px;
+	padding-right:12px;
+	padding-top:4px;
+	margin-top:6px;
+	font-size:9.5pt;
+	margin-top:5px;
+}
+
+
+.commentMsgCntr {
+	min-height:25px;
+} 
+
+
+
+
+.commentReplies {
+	min-height:1px;
+	margin:0;
+	padding-left:30px;
+	width:300px;
+	box-sizing: border-box;
+}
+
+
+.commentUserName {
+	font-size:10pt;
+}
+
+
+.commentUsrImg {
+	position:absolute;
+	top:7px;
+	left:5px;
+	height:28px;
+	width:28px;
+	border:solid silver 1px;
+	border-radius:14px;
+}
+
+
+.commentUsrImg2 {
+	height:28px;
+	width:28px;
+	border:solid silver 1px;
+	border-radius:14px;
+	margin-top:4px;
+	box-sizing: border-box;
+}
+
+
+.genericBtn {
+	background-color:#375a97;
+	color:white;
+	border:none;
+	border-radius:3px;
+	font-size:10pt;
+	cursor:pointer;
+}
+
+
+.grayText {
+	color:#5f6870;
+	font-size:9.5pt;
+}
+
+
+.hdr1 {
+	position:absolute;
+	left:12px;
+	top:60px;
+	font-size:20pt;
+}
+
+
+
+.hdr2 {
+	position:absolute;
+	left:12px;
+	top:5px;
+	font-size:20pt;
+}
+
+
+
+.hr1 {
+	width:495px;
+	color:silver;
+}
+
+
+.idDisp {
+	background-color:yellow;
+	color:blue;
+	padding:2px;
+	margin-top:2px;
+	border:solid red 1px;
+	border-radius: 3px;
+	box-sizing: border-box;
+	width:100px;
+	overflow:hidden;
+	cursor:pointer;
+	box-shadow: 2px 2px silver;
+}
+
+
+.inactiveTab {
+	position:absolute;
+	top:4px;
+	height:26px;
+	width:100px;
+	background-color:#cc8800;
+	color:#e0e0eb;
+	border:solid black 1px;
+	border-radius: 3px 3px 0px 0px;
+	text-align:center;
+	padding-top:4px;
+	overflow:hidden;
+	box-sizing: border-box;
+	cursor:pointer;
+}
+
+
+
+
+
+#invCode {
+	position:absolute;
+	left:160px;
+	top:38px;
+	width:100px;
+	font-size:12pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+
+
+.largeLikeHoverArea {
+	cursor:pointer;
+}
+
+
+#lblEmailAdr {
+	position:absolute;
+	left:12px;
+	top:120px;
+	font-size:15pt;
+}
+
+
+
+
+#lblEmailAdr2 {
+	position:absolute;
+	left:12px;
+	top:64px;
+	font-size:12pt;
+}
+
+
+
+#lblEmailAdr2c {
+	position:absolute;
+	left:12px;
+	top:88px;
+	font-size:12pt;
+}
+
+
+
+
+#lblInvitationCode {
+	position:absolute;
+	left:12px;
+	top:40px;
+	font-size:12pt;
+}
+
+
+
+.lblLogoff {
+	position:absolute;
+	left:0px;
+	top:28px;
+	text-align:center;
+	width:300px;
+	
+}
+
+
+
+#lblPassword {
+	position:absolute;
+	left:12px;
+	top:170px;
+	font-size:15pt;
+}
+
+
+
+#lblPassword2 {
+	position:absolute;
+	left:12px;
+	top:160px;
+	font-size:12pt;
+}
+
+
+
+#lblPassword2c {
+	position:absolute;
+	left:12px;
+	top:184px;
+	font-size:12pt;
+}
+
+
+#lblUsrFirstName {
+	position:absolute;
+	left:12px;
+	top:112px;
+	font-size:12pt;
+}
+
+
+
+#lblUsrLastName {
+	position:absolute;
+	left:12px;
+	top:136px;
+	font-size:12pt;
+}
+
+
 
 
 #leftSideCol {
@@ -62,7 +514,123 @@ a:VISITED {
 }
 
 
-.sidePanel_desktop {
+.likeCommentShareBtn {
+	height:29px;
+	margin-top:5px;
+	cursor:pointer;
+}
+
+.likeIcon {
+	margin:3px;
+}
+
+
+.liMsg {
+	padding:0;
+	margin:0;
+}
+
+
+.lnkOnly {
+	cursor:pointer;
+}
+
+
+
+.loginTab {
+	left:10px;
+}
+
+
+
+#logOffPanel {
+	position:absolute;
+	z-index:100;
+	width:300px;
+	height:120px;
+	left:100px;
+	top:100px;
+	background-color:#d9e6f2;
+	border:solid #375a97 2px;
+	border-radius: 3px;
+	display:none;
+} 
+
+
+
+#logonEmailAdr {
+	position:absolute;
+	left:160px;
+	top:118px;
+	width:280px;
+	font-size:15pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+
+
+
+#logonEmailAdr2 {
+	position:absolute;
+	left:160px;
+	top:62px;
+	width:280px;
+	font-size:12pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+
+
+
+#logonEmailAdr2_confirm {
+	position:absolute;
+	left:160px;
+	top:86px;
+	width:280px;
+	font-size:12pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+
+#logonInfoMsg {
+	position:absolute;
+	left:8px;
+	top:26px;
+	width:460px;
+	height:30px;
+}
+
+
+
+#logonPanel {
+	position:absolute;
+	z-index:100;
+	background-color:silver;
+	width:500px;
+	height:300px;
+	display:none;
+	border-radius:3px;
+	overflow:hidden;
+}
+
+
+
+
+#logonView {
+	position:absolute;
+	left:0;
+	top:30px;
+	width:500px;
+	height:275px;
+	background-image:linear-gradient(#ffcc99, #ffc100);
+}
+
+
+
+.mobileUserStatusPnl {
 	background-color:white;
 	border:solid silver 1px;
 	margin-left:0px;
@@ -70,126 +638,15 @@ a:VISITED {
 	border-radius:5px;
 	margin-bottom:8px;
 	width:300px;
-	min-height:200px;
+	min-height:80px;
 	padding:6px;
 	font-size:11pt;
-}
-
-.smlHdr {
-	color:#606770;
-	font-size:10pt;
-}
-
-.wallUsrTitleCntr {
-	position:relative;
-	top:0px;
-	left:0;
-}
-
-.peopleIcon1 {
-	position:absolute;
-	top:2px; 
-	left:6px;
-}
-
-.wallUsrTitle {
-	position:absolute;
-	top:4px; 
-	left:40px;
-}
-
-.usrLstCntr {
-	position:relative;
-	top:40px;
-	left:0px;
-	
-} 
-
-.usrPicCntr {
-	position:absolute;
-	padding:0;
-	margin:0;
-	width:95px;
-	height:95px;
-	overflow:hidden;
-}
-
-.usrPic {
-	position:absolute;
-	left:0;
-	top:0;
-	width:95px;
-	height:95px;
-	padding:0;
-	margin:0;
-	cursor:pointer;
-}
-
-.usrPicName {
-	position:absolute;
-	left:0px;
-	top:58px;
-	width:95px;
-	height:24px;
-	color:white;
-	font-size:9pt;
-	text-align:center;
-	z-index:20;
-	padding:0;
-	margin:0;
-	text-shadow: 1px 1px gray;
-	cursor:pointer;
-}
-
-
-.userImg1 {
-	height:38px;
-	width:38px;
-	border:solid silver 1px;
-	border-radius:19px;
-	position:absolute;
-	left:6px;
-	top:6px;
-}
-
-#newPost {
-	border:none;
-	font-size:11pt;
-	position:absolute;
-	left:55px;
-	top:10px;
-	width:420px;
-}
-
-
-#postCheck {
-	
-	width:440px;
-	min-height:10px;
-	font-size:10pt;
-	float:left;
-	text-align:left;
-} 
-
-#postMsg {
-	position:absolute;
-	left:60px;
-	top:72px;
-	font-size:9pt;
-}
-
-.postElipses {
-	position:absolute;
-	top:15px;
-	left:480px;
-	width:16px;
-	cursor:pointer;
 }
 
 
 #msgCol {
 	position:relative;
-	top:10px;
+	top:0px;
 	left:335px;
 	height:2000px;
 	overflow-x:hidden;
@@ -197,51 +654,28 @@ a:VISITED {
 	border-bottom:solid gray 1px;
 }
 
-.sidePanelList {
+
+.msgColLst {
 	list-style-type:none;
-	margin:0px;
-	padding:0;
-	float:left;
-	width:512px;
-}
-
-
-#msgs {
-	list-style-type:none;
-	margin:0px;
-	padding:0;
-	position:absolute;
-	left:0;
-	top:135px;
-	float:left;
-}
-
-.liMsg {
-	padding:0;
-	margin:0;
-	float:left;
-}
-
-
-.msgSections {
 	margin:0px;
 	padding:0px;
-	list-style-type:none;
+	padding-top:10px;
 }
 
-.msgSection {
-	margin-top:0px;
-	padding-top:0px;
-}
+
+
+.msgCountInfo {
+	min-height:40px;
+	display:none;
+} 
+
 
 .msgCntr {
-
 	width:510px;
 	min-height:100px;
 	background-color:white;
 	border:solid silver 1px;
 	margin-left:0px;
-	float:left;
 	border-radius:5px;
 	margin-bottom:8px;
 }
@@ -263,11 +697,6 @@ a:VISITED {
 	height:80px;
 }
 
-.msgCountInfo {
-
-	min-height:40px;
-} 
-
 
 .msgLikeAndCountSummary {
 	width:488px;
@@ -280,55 +709,206 @@ a:VISITED {
 } 
 
 
+#msgs {
+	list-style-type:none;
+	margin:0px;
+	padding:0;	
+}
+
+
+.msgSection {
+	margin-top:0px;
+	padding-top:0px;
+}
+
+
+.msgSections {
+	margin:0px;
+	padding:0px;
+	list-style-type:none;
+}
+
+
+
+#msgWallLogo {
+	width:35px;
+	height:35px;
+	position:absolute;
+	top:3px;
+	border-radius:3px;
+}
+
+
+#newPost {
+	border:none;
+	font-size:11pt;
+	width:420px;
+}
+
+
+
+
+.notAUser {
+	position:absolute;
+	top:235px;
+	left:175px;
+}
+
+
+
+.peopleIcon1 {
+	position:absolute;
+	top:2px; 
+	left:6px;
+}
+
+
+#pgHdr {
+	position:absolute;
+	top:0px; left:0px;
+	height:42px;
+	background-color:orange;
+}
+
+
+#postBtn {
+	background-color:#375a97;
+	color:white;
+	border:none;
+	border-radius:5px;
+	font-size:10pt;
+	cursor:pointer;
+	display:none;
+}
+
+
+
+#postCheck {	
+	width:440px;
+	min-height:10px;
+	font-size:10pt;
+	text-align:left;
+} 
+
+
+.postContent {
+	width:440px;
+	min-height:40px;
+	font-size:10pt;
+	text-align:left;
+	padding-left:12px;
+	
+}
+
+
+
+.postedAtInfo {
+	position:absolute;
+	left:55px;
+	top:26px;
+	font-size:10pt;
+	color:#606770;
+}
+
+
+
+.postedAtInfo2 {
+	font-size:9pt;
+	color:#606770;
+}
+
+
+
+.postElipses {
+	position:absolute;
+	top:15px;
+	left:480px;
+	width:16px;
+	cursor:pointer;
+}
+
+
+
+
+#postMsg {
+	font-size:9pt;
+}
+
+
+/*
+   note that I thought it made more sense to place this under 'p' rather than 'u'.
+ */
+ul.postReplies {
+	margin:0;
+	padding-left:16px;
+	list-style-type:none;
+}
+
+
 .postRepliesSum1 {
 	cursor:pointer;
-	color:#375a97;
+	color:#375a97;  /*     #375a97  is the color of hyperlinks inside of Facebook.     */
 	font-size:9.5pt;
 } 
 
-.likeCommentShareBtn {
-	height:29px;
-	margin-top:5px;
-	cursor:pointer;
-}
 
 
-.commentContainer {
-	border-top:solid gray 1px;
-	min-height:50px;
-}
-
-.commentsLst {
-	list-style-type:none;
-	margin:0px;
-	padding:0;
-}
-
-.commentInputCntr {
-	position:relative;
-	top:0px;
-	left:0px;
-}
-
-.commentUsrImg {
+.postUserName {
 	position:absolute;
-	top:7px;
-	left:5px;
-	height:28px;
-	width:28px;
-	border:solid silver 1px;
-	border-radius:14px;
+	left:55px;
+	top:6px;
 }
 
-.commentUsrImg2 {
-	height:28px;
-	width:28px;
-	border:solid silver 1px;
-	border-radius:14px;
-	margin-top:4px;
-	box-sizing: border-box;
+
+
+#problems {
+	position:absolute;
+	top:100px;
+	left:10px;
+	display:none;
+	z-index:200;
+	background-color:yellow;
+	width:1000px;
+	height:800px;
+	padding:5px;
+	overflow:scroll;
 }
 
+
+
+#pwd {
+	position:absolute;
+	left:160px;
+	top:168px;
+	width:280px;
+	font-size:15pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+
+
+#pwd2 {
+	position:absolute;
+	left:160px;
+	top:158px;
+	width:160px;
+	font-size:12pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+
+
+#pwd2_confirm {
+	position:absolute;
+	left:160px;
+	top:182px;
+	width:160px;
+	font-size:12pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
 
 .replyUsrImg {
 	height:14px;
@@ -349,86 +929,31 @@ a:VISITED {
 	box-sizing: border-box;
 }
 
-.lnkOnly {
-	cursor:pointer;
-}
 
 
-.commentInput {
-	font-size:9.5pt;
-	color:black;
-	min-height:25px;
-	border:solid gray 1px;
-	border-radius:15px;
-	background-color:#e9ebee;
-	padding-left:10px;
-	width:430px;
-	margin-top:3px;
-}
-
-
-
-.txtReply {
-	font-size:9.5pt;
-	color:black;
-	min-height:25px;
-	border:solid gray 1px;
-	border-radius:15px;
-	background-color:#e9ebee;
-	padding-left:10px;
-	width:400px;
-	margin-top:3px;
-}
-
-
-.commentMsgCntr {
-	min-height:25px;
-} 
-
-.commentMsg {
-	background-color:#e9ebee;
-	border-radius:15px;
-	min-height:25px;
-	min-width:200px;
-	box-sizing: border-box;
-	padding-left:12px;
-	padding-right:12px;
-	padding-top:4px;
-	margin-top:6px;
-	font-size:9.5pt;
-	margin-top:5px;
-}
-
-
-.hr1 {
-	position:absolute;
-	left:8px;
-	top:52px;
-	width:495px;
-	color:silver;
-}
-
-#postBtn {
-	position:absolute;
-	left:8px;
-	top:65px;
-	background-color:#375a97;
-	color:white;
-	border:none;
+.sidePanel_desktop {
+	background-color:white;
+	border:solid silver 1px;
+	margin-left:0px;
+	text-align:left;
 	border-radius:5px;
-	font-size:10pt;
-	cursor:pointer;
-	display:none;
+	margin-bottom:8px;
+	width:300px;
+	min-height:200px;
+	padding:6px;
+	font-size:11pt;
 }
 
-.genericBtn {
-	background-color:#375a97;
-	color:white;
-	border:none;
-	border-radius:3px;
-	font-size:10pt;
-	cursor:pointer;
+
+.sidePanelList {
+	list-style-type:none;
+	margin:0px;
+	padding:0;
+	width:512px;
 }
+
+
+
 
 .signupBtn {
 	background-color:#00b300;
@@ -440,280 +965,26 @@ a:VISITED {
 }
 
 
-.smallLink {
-	font-size:9pt;
-	color:#375a97;
-	cursor:pointer;
-}
 
 
-.userNameTitle {
-	font-size:11pt;
-	font-weight:bold;
-	color:#375a97;
-	cursor:pointer;
-}
-
-.commentUserName {
-	font-size:10pt;
-}
-
-.userNameTitle2 {
-}
-
-.postUserName {
+#signUpMsg {
 	position:absolute;
-	left:55px;
-	top:6px;
-}
-
-.postedAtInfo {
-	position:absolute;
-	left:55px;
-	top:26px;
-	font-size:10pt;
-	color:#606770;
-}
-
-.postedAtInfo2 {
-	font-size:9pt;
-	color:#606770;
-}
-
-.postContent {
-	width:440px;
-	min-height:40px;
-	font-size:10pt;
-	text-align:left;
-	padding-left:12px;
-	
+	left:120px;
+	top:235px;
+	width:260px;
+	background-color:lightyellow;
+	border-radius: 3px;
+	color:red;
 }
 
 
-.commentReplies {
-	min-height:1px;
-	margin:0;
-	padding-left:30px;
-	width:300px;
-	box-sizing: border-box;
-}
 
-
-ul.postReplies {
-	margin:0;
-	padding-left:16px;
-	list-style-type:none;
-}
-
-
-#tint {
-	position:absolute;
-	left:0;
-	top:0;
-	background-color:black;
-	opacity:.7;
-	z-index:50;
-	display:none;
-}
-
-#logonPanel {
-	position:absolute;
-	z-index:100;
-	background-color:silver;
-	width:500px;
-	height:300px;
-	display:none;
-	border-radius:3px;
-	overflow:hidden;
-}
-
-.tabLeftSpacing {
-	position:absolute;
-	left:0;
-	top:4px;
-	height:24px;
-	border-bottom:solid gray 1px;
-	border-top:solid silver 1px;
-	width:10px;
-}
-
-.activeTab {
-	position:absolute;
-	top:4px;	
-	height:26px;
-	width:100px;
-	background-color:#ffcc99;
-	border-left:solid gray 1px;
-	border-top:solid gray 1px;
-	border-right:solid gray 1px;
-	border-radius: 3px 3px 0px 0px;
-	text-align:center;
-	box-sizing: border-box;
-	padding-top:2px;
-	
-}
-
-.inactiveTab {
-	position:absolute;
-	top:4px;
-	height:26px;
-	width:100px;
-	background-color:#cc8800;
-	color:#e0e0eb;
-	border:solid black 1px;
-	border-radius: 3px 3px 0px 0px;
-	text-align:center;
-	padding-top:4px;
-	overflow:hidden;
-	box-sizing: border-box;
-	cursor:pointer;
-}
-
-.loginTab {
-	left:10px;
-}
 
 .signupTab {
 	left:115px;
 }
 
-.tabRightSpacing {
-	position:absolute;
-	left:215px;
-	top:4px;
-	height:24px;
-	border-top:solid silver 1px;
-	border-bottom:solid gray 1px;
-	width:285px;
-}
 
-
-#logonView {
-	position:absolute;
-	left:0;
-	top:30px;
-	width:500px;
-	height:275px;
-	background-image:linear-gradient(#ffcc99, #ffc100);
-}
-
-#logonInfoMsg {
-	position:absolute;
-	left:8px;
-	top:26px;
-	width:460px;
-	height:30px;
-}
-
-
-.hdr1{
-	position:absolute;
-	left:12px;
-	top:60px;
-	font-size:20pt;
-}
-
-.hdr2{
-	position:absolute;
-	left:12px;
-	top:5px;
-	font-size:20pt;
-}
-
-
-#lblEmailAdr {
-	position:absolute;
-	left:12px;
-	top:120px;
-	font-size:15pt;
-}
-
-#logonEmailAdr {
-	position:absolute;
-	left:160px;
-	top:118px;
-	width:280px;
-	font-size:15pt;
-	border:solid gray 1px;
-	border-radius: 3px;
-}
-
-#lblPassword {
-	position:absolute;
-	left:12px;
-	top:170px;
-	font-size:15pt;
-}
-
-#pwd {
-	position:absolute;
-	left:160px;
-	top:168px;
-	width:280px;
-	font-size:15pt;
-	border:solid gray 1px;
-	border-radius: 3px;
-}
-
-.cancelBtn {
-	background-color:#E9EBEE;
-	border:solid gray 2px;
-	color:black;
-	font-size:15pt;
-	position:absolute;
-	width:100px;
-	height:40px;
-	border-radius:5px;
-	cursor:pointer;
-}
-
-.cancelBtnLogon {
-	left:12px;
-	top:225px;
-	
-}
-
-.userSubmitBtn {
-	color:white;
-	font-size:15pt;
-	background-color:#375a97;
-	position:absolute;
-	width:100px;
-	height:40px;
-	border-radius:5px;
-	border:none;
-	cursor:pointer;
-}
-
-.userSubmitBtnDisabled {
-	color:white;
-	font-size:15pt;
-	background-color:#9db5d7;
-	position:absolute;
-	width:100px;
-	height:40px;
-	border-radius:5px;
-	border:none;
-	cursor:pointer;
-}
-
-.userSubmitBtnLogon {
-	left:390px;
-	top:225px;
-}
-
-.notAUser {
-	position:absolute;
-	top:235px;
-	left:175px;
-}
-
-
-.specLnk {
-	text-decoration:underline;
-	cursor:pointer;
-	color:#375a97;
-}
 
 
 #signUpView {
@@ -727,174 +998,40 @@ ul.postReplies {
 }
 
 
-#lblInvitationCode {
+
+
+#siteTitle {
 	position:absolute;
-	left:12px;
-	top:40px;
-	font-size:12pt;
+	top:6px;
+	font-size:19pt;
 }
 
-#invCode {
-	position:absolute;
-	left:160px;
-	top:38px;
-	width:100px;
-	font-size:12pt;
-	border:solid gray 1px;
-	border-radius: 3px;
+
+.smallLink {
+	font-size:9pt;
+	color:#375a97;  /*     #375a97  is the color of hyperlinks inside of Facebook.     */
+	cursor:pointer;
 }
 
-#lblEmailAdr2 {
-	position:absolute;
-	left:12px;
-	top:64px;
-	font-size:12pt;
-}
 
-#logonEmailAdr2 {
-	position:absolute;
-	left:160px;
-	top:62px;
-	width:280px;
-	font-size:12pt;
-	border:solid gray 1px;
-	border-radius: 3px;
-}
-
-#lblEmailAdr2c {
-	position:absolute;
-	left:12px;
-	top:88px;
-	font-size:12pt;
-}
-
-#logonEmailAdr2_confirm {
-	position:absolute;
-	left:160px;
-	top:86px;
-	width:280px;
-	font-size:12pt;
-	border:solid gray 1px;
-	border-radius: 3px;
+.smlHdr {
+	color:#606770;
+	font-size:9pt;
+	font-weight:bold;
+	padding-top:4px;
+	padding-bottom:4px;
 }
 
 
 
-#lblUsrFirstName {
-	position:absolute;
-	left:12px;
-	top:112px;
-	font-size:12pt;
-}
 
-#usrFirstName {
-	position:absolute;
-	left:160px;
-	top:110px;
-	width:200px;
-	font-size:12pt;
-	border:solid gray 1px;
-	border-radius: 3px;
+.specLnk {
+	text-decoration:underline;
+	cursor:pointer;
+	color:#375a97;  /*     #375a97  is the color of hyperlinks inside of Facebook.     */
 }
 
 
-#lblUsrLastName {
-	position:absolute;
-	left:12px;
-	top:136px;
-	font-size:12pt;
-}
-
-#usrLastName {
-	position:absolute;
-	left:160px;
-	top:134px;
-	width:200px;
-	font-size:12pt;
-	border:solid gray 1px;
-	border-radius: 3px;
-}
-
-
-#lblPassword2 {
-	position:absolute;
-	left:12px;
-	top:160px;
-	font-size:12pt;
-}
-
-#pwd2 {
-	position:absolute;
-	left:160px;
-	top:158px;
-	width:160px;
-	font-size:12pt;
-	border:solid gray 1px;
-	border-radius: 3px;
-}
-
-
-#lblPassword2c {
-	position:absolute;
-	left:12px;
-	top:184px;
-	font-size:12pt;
-}
-
-#pwd2_confirm {
-	position:absolute;
-	left:160px;
-	top:182px;
-	width:160px;
-	font-size:12pt;
-	border:solid gray 1px;
-	border-radius: 3px;
-}
-
-#signUpMsg {
-	position:absolute;
-	left:120px;
-	top:235px;
-	width:260px;
-	background-color:lightyellow;
-	border-radius: 3px;
-	color:red;
-}
-
-
-#logOffPanel {
-	position:absolute;
-	z-index:100;
-	width:300px;
-	height:120px;
-	left:100px;
-	top:100px;
-	background-color:#d9e6f2;
-	border:solid #375a97 2px;
-	border-radius: 3px;
-	display:none;
-} 
-
-.lblLogoff {
-	position:absolute;
-	left:0px;
-	top:28px;
-	text-align:center;
-	width:300px;
-	
-}
-
-
-
-#userProfilePanel {
-	position:absolute;
-	z-index:100;
-	background-color:silver;
-	display:none;
-	width:400px;
-	height:200px;
-	border-radius: 3px;
-}
 
 
 #statusMsg {
@@ -912,16 +1049,253 @@ ul.postReplies {
 	display:none;
 } 
 
-#problems {
+
+
+
+.tabLeftSpacing {
 	position:absolute;
-	top:100px;
-	left:10px;
-	display:none;
-	z-index:200;
-	background-color:yellow;
+	left:0;
+	top:4px;
+	height:24px;
+	border-bottom:solid gray 1px;
+	border-top:solid silver 1px;
+	width:10px;
 }
 
 
+
+.tabRightSpacing {
+	position:absolute;
+	left:215px;
+	top:4px;
+	height:24px;
+	border-top:solid silver 1px;
+	border-bottom:solid gray 1px;
+	width:285px;
+}
+
+
+
+#tint {
+	position:absolute;
+	left:0;
+	top:0;
+	background-color:black;
+	opacity:.7;
+	z-index:50;
+	display:none;
+}
+
+
+
+#topLvlPgContent_desktop {
+	position:absolute;
+	top:0;
+	width:850px;
+	min-height:200px;
+	overflow:hidden;
+}
+
+
+.txtReply {
+	font-size:9.5pt;
+	color:black;
+	min-height:25px;
+	border:solid gray 1px;
+	border-radius:15px;
+	background-color:#e9ebee;
+	padding-left:10px;
+	width:400px;
+	margin-top:3px;
+}
+
+
+
+.userImg1 {
+	height:38px;
+	width:38px;
+	border:solid silver 1px;
+	border-radius:19px;
+	
+}
+
+
+
+
+
+.userNameTitle {
+	font-size:11pt;
+	font-weight:bold;
+	color:#375a97;  /*     #375a97  is the color of hyperlinks inside of Facebook.     */
+	cursor:pointer;
+}
+
+
+
+
+.userNameTitle2 {
+}
+
+
+
+
+#userProfilePanel {
+	position:absolute;
+	z-index:100;
+	background-color:silver;
+	display:none;
+	width:400px;
+	height:200px;
+	border-radius: 3px;
+}
+
+
+
+
+#usrFirstName {
+	position:absolute;
+	left:160px;
+	top:110px;
+	width:200px;
+	font-size:12pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+
+
+#usrLastName {
+	position:absolute;
+	left:160px;
+	top:134px;
+	width:200px;
+	font-size:12pt;
+	border:solid gray 1px;
+	border-radius: 3px;
+}
+
+
+
+.usrLstCntr {
+	position:relative;
+	top:40px;
+	left:0px;
+	
+} 
+
+
+.usrPic {
+	position:absolute;
+	left:0;
+	top:0;
+	width:95px;
+	height:95px;
+	padding:0;
+	margin:0;
+	cursor:pointer;
+}
+
+.usrPicCntr {
+	position:absolute;
+	padding:0;
+	margin:0;
+	width:95px;
+	height:95px;
+	overflow:hidden;
+}
+
+
+.usrPicName {
+	position:absolute;
+	left:0px;
+	top:58px;
+	width:95px;
+	height:24px;
+	color:white;
+	font-size:9pt;
+	text-align:center;
+	z-index:20;
+	padding:0;
+	margin:0;
+	text-shadow: 1px 1px gray;
+	cursor:pointer;
+}
+
+
+
+
+.userSubmitBtn {
+	color:white;
+	font-size:15pt;
+	background-color:#375a97;
+	position:absolute;
+	width:100px;
+	height:40px;
+	border-radius:5px;
+	border:none;
+	cursor:pointer;
+}
+
+
+
+.userSubmitBtnDisabled {
+	color:white;
+	font-size:15pt;
+	background-color:#9db5d7;
+	position:absolute;
+	width:100px;
+	height:40px;
+	border-radius:5px;
+	border:none;
+	cursor:pointer;
+}
+
+
+
+
+
+.userSubmitBtnLogon {
+	left:390px;
+	top:225px;
+}
+
+
+
+
+#viewPort {
+	position:absolute;
+	top:42px; 
+	left:0px;
+	overflow:hidden;
+	border-top:solid gray 1px;
+}
+
+
+
+#wallInfo1 {
+	position:absolute;
+	right:-10px;
+	top:28px;
+	font-size:9pt;
+	background-color:yellow;
+	padding:2px;
+	border-radius:6px;
+	box-sizing: border-box;
+	z-index:100;
+	border:solid red 1px;
+}
+
+.wallUsrTitle {
+	position:absolute;
+	top:4px; 
+	left:40px;
+}
+
+.wallUsrTitleCntr {
+	position:relative;
+	top:0px;
+	left:0;
+}
 
 
 

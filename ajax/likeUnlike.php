@@ -1,23 +1,28 @@
 <?php
 	require_once '../pdo_connect.php';
+	require_once './getWallMessages.php';
 	
-/*
+/*********************************************************************************
    Like / Unlike a Message (a toggle)
-   note to self: webLogic
- */
+   note to self: Adobe webLogic
+ *********************************************************************************/
  
  	$nMsgId = (int)$_POST["msgId"];
  	$nUserId = (int)$_SESSION["logonUserId"];
  	
+ 	
+ 	$LIKE = 0;
+ 	
+ 	
  	if ($nMsgId < 1 || $nUserId < 1) {
- 		echo 'problem!';
+ 		echo 'problem!<br>';
  		return;
  	} // end if
  	
  	try {
  		$db->beginTransaction();
  		
- 		$nMsgUserId = 0;
+ 		$nMsgUserId = 0; // default unless overwritten
  		
  	   /***************************************************
  		  does this user have a "Like" on this message ?
@@ -44,24 +49,28 @@
  		$stmt1 = null;
  		
  		if ($nMsgUserId == 0) {
- 			// not liked by user right now, so Like it
+ 			// not liked by user right now, so {Like} it!
  			
  			$sql = 'INSERT INTO msgUser (';
  			$sql = $sql . '	  msgId, ';
  			$sql = $sql . '	  userId, ';
+ 			$sql = $sql . '	  dataType, ';
  			$sql = $sql . '	  dataValueStr, '; 	
  			$sql = $sql . '	  createDate, '; 	
  			$sql = $sql . '	  updateDate '; 			
  			$sql = $sql . ') VALUES(';
  			$sql = $sql . '	  :msgId, ';
  			$sql = $sql . '	  :userId, ';
- 			$sql = $sql . '	  NOW(), ';
- 			$sql = $sql . '	  NOW(), ';
- 			$sql = $sql . '	  \'like\' ';
+ 			$sql = $sql . '	  :dataType, ';
+ 			$sql = $sql . '	  \'like\', ';
+ 			$sql = $sql . '	  NOW(), '; // create date
+ 			$sql = $sql . '	  NOW()  '; // update date
+ 			
  			$sql = $sql . ')';
  			$stmt2 = $db->prepare($sql);
 			$stmt2->bindParam(':msgId', $nMsgId, PDO::PARAM_INT);
 			$stmt2->bindParam(':userId', $nUserId, PDO::PARAM_INT);
+			$stmt2->bindParam(':dataType', $LIKE, PDO::PARAM_INT);
 			$stmt2->execute();	
 			$nMsgUserId = $db->lastInsertId();
 			$stmt2 = null;
@@ -74,7 +83,7 @@
 			$stmt3->execute();	
 			$stmt3 = null;
 			
-			$sEventDetails = "msgId liked:" . $nMsgId;
+			$sEventDetails = "msgId liked: " . $nMsgId;
 			logEvent('likePost', 'Post was Liked', $sEventDetails, 0);
 			
 			echo '{' . "\n ";
@@ -83,11 +92,13 @@
 					echo '"msgUserId":' . $nMsgUserId . ',' . "\n";
 					echo '"msgId":' . $nMsgId . ',' . "\n";
 					echo '"userId":' . $nUserId . ',' . "\n";
+					echo '"dataType":' . $LIKE . ',' . "\n";
 					echo '"dataValueStr":"like"' . "\n";
+					outputLatestWallMessages($nUserId);
 				echo '}';
 			echo '}';
  		} else {
- 			// currently liked by the user now so Unlike it
+ 			// currently liked by the user now so {Unlike} it!
  			
  			$sql = 'DELETE FROM msgUser ';
  			$sql = $sql . 'WHERE msgUserId = :msgUserId';
@@ -104,7 +115,7 @@
 			$stmt4->execute();	
 			$stmt4 = null;
 			
-			$sEventDetails = "msgId unliked:" . $nMsgId;
+			$sEventDetails = "msgId unliked: " . $nMsgId;
 			logEvent('unlikePost', 'Post was Unliked', $sEventDetails, 0);
 						
 			echo '{' . "\n ";
@@ -113,7 +124,9 @@
 					echo '"msgUserId":' . $nMsgUserId . ',' . "\n";
 					echo '"msgId":' . $nMsgId . ',' . "\n";
 					echo '"userId":' . $nUserId . ',' . "\n";
+					echo '"dataType":' . $LIKE . ',' . "\n";
 					echo '"dataValueStr":"unlike"' . "\n";
+					outputLatestWallMessages($nUserId);
 				echo '}';
 			echo '}';
  		} // end if
