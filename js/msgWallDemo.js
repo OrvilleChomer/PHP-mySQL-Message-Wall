@@ -32,6 +32,7 @@
 		
 		
 		// initialize "app" values:
+		resetAfterLogonCmd();
 		app.CR_key = 13;
 		app.contentWidth = 850;
 		app.currentOpenDialog = "";
@@ -203,6 +204,20 @@
 		
 		newComment.focus();
 	} // end of function beginEnteringComment()
+	
+	
+	
+   /***************************************************************
+         Deliberate cancel by user of logon
+         
+         called from button click event
+	***************************************************************/	
+	function cancelLogonPanel() {
+	
+		closeLogonPanel();
+		resetAfterLogonCmd();
+		
+	} // end of function cancelLogonPanel()
 	
 	
 	
@@ -539,8 +554,16 @@
    /***************************************************************
       basic Post object is generated when:
        - user is already logged in
-       - they have typed in a message to post on the wall
+       - they have typed in a:
+             - message to post on the wall
+             - a new comment on an existing message
+             - a reply on an existing comment or other reply
+             
        - they have clicked the POST button or hit the Enter key
+       
+       
+       this function is NOT run when getting and processing posts
+       from the server via Ajax.
 	***************************************************************/
 	function createNewPostObj(sMsg, niParentMsgId) {
 		var post = {};
@@ -557,7 +580,6 @@
 		post.postHeight = 0;
 		post.likeCount = 0;
 		post.youLiked = false;
-		post.commentCount = 0;
 		post.parentPost = undefined;
 		post.repliesByIndex = [];
 		post.repliesById = [];
@@ -585,8 +607,13 @@
 				} else {
 					post.topLevelMsgId = parentMsg.topLevelMsgId;
 				} // end if/else
-				
+								
+				app.postsByIndex[app.postsByIndex.length] = post; // add to end of array
 			} // end if
+		} else {
+		    // no parent...
+		    app.postsByIndex.unshift(post); // add to beginning of array
+		    app.topLevelPostsByIndex.unshift(post); // add to beginning of array
 		} // end if
 		
 		
@@ -731,9 +758,14 @@
 	
 	
 	
+	
+	
    /***************************************************************
+   	   generates markup for a post's comments as well as a 
+   	   comment's replies.   And returns that markup string.
+   	   
 	***************************************************************/	
-	function genPostReplyMarkup(post) {
+	function genPostReplyMarkup(post, options) {
 		var s=[];
 		var nMax = post.repliesByIndex.length;
 		var n, reply, reply2;
@@ -742,6 +774,10 @@
 		var sImgClass = "commentUsrImg2";
 		var usr;
 		var sPostedAt, sReply;
+		
+		if (paramEquals(options, "break", true)) {
+			debugger;
+		} // end if
 		
 		for (n=0;n<nMax;n++) {
 			reply = post.repliesByIndex[n];  // can be a Comment or a Reply 
@@ -1671,6 +1707,7 @@
 		s[s.length] = "<center>";
 		s[s.length] = "<p>";
 		
+		/*
 		s[s.length] = "<button class='signupBtn' ";
 		s[s.length] = "style='width:80px;' ";		
 		s[s.length] = "onclick="+Q;
@@ -1679,6 +1716,7 @@
 		s[s.length] = ">";
 		s[s.length] = "Edit Profile";
 		s[s.length] = "</button>&nbsp;&nbsp;";
+		*/
 		
 		s[s.length] = "<button class='genericBtn' ";
 		s[s.length] = "style='width:80px;' ";
@@ -1786,6 +1824,8 @@
 		var likeLst1;
 		
 		if (app.currentUserId === 0) {
+			app.afterLogonCmd = "like";
+			app.afterLogonMsgId = nMsgId;
 			showLogonPanel(sInfo);  // got to be logged in first!
 			return;
 		} // end if
@@ -1859,6 +1899,28 @@
 	
 	
 	
+	
+	
+   /******************************************************************************
+    ******************************************************************************/			
+	function paramEquals(obj, sParam, vValue) {
+		if (typeof obj !== "object") {
+			return false;
+		} // end if
+		
+		if (typeof obj[sParam] === "undefined") {
+			return false;
+		} // end if
+		
+		if (obj[sParam] === vValue) {
+			return true;
+		} else {
+			return false;
+		} // end if/else
+	} // end of function paramEquals()	
+		
+		
+		
 		
    /******************************************************************************
     ******************************************************************************/			
@@ -1904,6 +1966,54 @@
 	
 	
    /***************************************************************
+	***************************************************************/	
+	function processAfterLogonCmdPart1() {
+	
+		if (app.afterLogonCmd === "post") {
+			if (typeof app.afterLogonTxtElement !== "undefined") {
+				app.afterLogonTxtElement.readonly = true;
+			} // end if
+		} // end if
+		
+		setTimeout("processAfterLogonCmdPart2()",500);
+		
+	} // end of function processAfterLogonCmdPart1()
+	
+	
+	
+	
+	
+   /***************************************************************
+	***************************************************************/	
+	function processAfterLogonCmdPart2() {
+		var nParentMsgId;
+		var sPostValue;
+		var txtCtrl;
+		
+		if (app.afterLogonCmd === "post") {
+			nParentMsgId = app.afterLogonParentMsgId;
+			sPostValue = app.afterLogonPostValue;
+			txtCtrl = app.afterLogonTxtElement;
+			
+			if (txtCtrl !== "undefined") {
+				txtCtrl.readonly = false;
+			} // end if
+			
+			savePost(nParentMsgId, sPostValue, txtCtrl);
+		} // end if
+		
+		if (app.afterLogonCmd === "like") {
+			likeUnlike(app.afterLogonMsgId);
+		} // end if
+		
+		resetAfterLogonCmd();
+	} // end of function processAfterLogonCmdPart2()
+	
+	
+	
+	
+	
+   /***************************************************************
 	***************************************************************/
 	function processPosts(latestPosts) {
 		var nMax = latestPosts.length;
@@ -1912,7 +2022,7 @@
 		
 		for (n=0;n<nMax;n++) {
 			post = latestPosts[n];
-			
+
 			post.postHeight = 0; // new or old, need to recalculate
 			
 			post.repliesExpanded = false;
@@ -2090,10 +2200,27 @@
 	
 	
 	
+   /***************************************************************
+	  
+	***************************************************************/	
+	function resetAfterLogonCmd() {
+		app.afterLogonCmd = "";
+		app.afterLogonMsgId = 0;
+		app.afterLogonParentMsgId = 0;
+		app.afterLogonPostValue = "";
+		app.afterLogonTxtElement = undefined;
+	} // end of function resetAfterLogonCmd()
+	
+	
+	
 	
 	
    /***************************************************************
 	  save a top-level post or a Reply to db via Ajax
+	  
+	  called:
+	     - onclick event on button id'd as: "postBtn" in index.php
+	        (this is for top-level posts)
 	***************************************************************/
 	function savePost(nParentMsgId, siPostValue, txtCtrl) {
 		var sInfo = "You need to be logged in before you can post a message.";
@@ -2116,12 +2243,17 @@
 				
 			} // end if
 			
+			// stash values so post can be done automatically after a successful logon:
+			app.afterLogonCmd = "post";
+			app.afterLogonParentMsgId = nParentMsgId;
+			app.afterLogonPostValue = siPostValue;
+			app.afterLogonTxtElement = txtCtrl;
+		
 			showLogonPanel(sInfo);  // got to be logged in first!
 			return;
 			
 		} // end if
-		
-	
+			
 		
 		var wrk = makeAJAXWorkObj();
 		var sURL = "./ajax/savePost.php";
@@ -2129,7 +2261,7 @@
 		var postBtn = $("#postBtn")[0];
 		var sPostValue = newPost.value;
 		var post;
-		var aNewPosts = [];
+		var aNewPosts = [];  // this is fine
 		var sInfo;
 		var commentCntr;
 		var sCntrId = "msgComments";
@@ -2138,21 +2270,24 @@
 		if (typeof siPostValue !== "undefined") {
 			sPostValue = siPostValue;
 		} // end if
+				
+				
 		
-		
-		
-		
+	   /*****************************************************************
+	   	  note: function below adds new post to parent post already
+	   	        (if post has a parent)!
+	   	        
+	   	        Also to app level arrays
+		*****************************************************************/
 		post = createNewPostObj(sPostValue, nParentMsgId);
-		
-		app.postsByIndex.unshift(post); // add to beginning of array
 		
 		
 		if (nParentMsgId === 0) {
 			newPost.value = ""; //clear out text box for wall message post
 			newPost.focus();
 			postBtn.style.display = "none"; // hide post button
-			app.topLevelPostsByIndex.unshift(post); // add to beginning of array	
-			aNewPosts[0] = post;
+				
+			aNewPosts[0] = post;  // this is fine
 
 			updateWallPostsDisplay(aNewPosts);
 			sInfo = "Posting message to Wall...";
@@ -2163,12 +2298,9 @@
 				sCntrId = "postReplies";
 			} // end if
 			
-	/*		if (post.indentLevel > 0) {			
-				parentMsg.repliesByIndex[parentMsg.repliesByIndex.length] = post;
-				parentMsg.repliesById[post.msgId] = post;
-			} // end if  */
 			
 			commentCntr = getDomEl(sCntrId, parentMsg.msgId);
+			//commentCntr.innerHTML = genPostReplyMarkup(parentMsg); // update GUI with changes
 			commentCntr.innerHTML = genPostReplyMarkup(parentMsg); // update GUI with changes
 						
 			sInfo = "Adding Comment to Post...";
@@ -2191,13 +2323,11 @@
 		wrk.addPostFieldValueForInt("topLevelMsgId", post.topLevelMsgId);	
 		wrk.addPostFieldValueForString("postContent", post.msgContent);
 						
-		
 		wrk.nextDoPostToServerAndThenDo(function(sResult) {
 			var obj = jsonParse(sResult);
 			hideStatusMsg();
 			
 			if (obj.status === "postSuccessful") {
-			
 				// put this (if) condition below in with the idea of using this save
 				// function to update Existing posts not just create new ones
 				if (post.msgId < 0) {
@@ -2732,6 +2862,11 @@
 				
 				usrStatusPnl.innerHTML = getUserInfoMarkup();
 				hideStatusMsg();
+				
+				if (app.afterLogonCmd !== "") {
+					processAfterLogonCmdPart1();
+				} // end if
+				
 				closeLogonPanel();
 			} else {
 				app.currentUserId = 0;

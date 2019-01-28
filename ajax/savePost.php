@@ -3,20 +3,57 @@
 	require_once './getWallMessages.php';
 	
 	
-	/*************************************************************
+	/**********************************************************************
 	   Saves top level posts as well as replies to those posts!
 	
+	   In other words:   
+	      save all top level posts, comments to those posts, and
+	      replies to those comments!
+	      
+	      ...
+	      
+	      
 		ref: casting strings to ints...
 		http://www.phpf1.com/tutorial/php-string-to-int.html
-	**************************************************************/
+		
+		========================================================
+		
+		This file is accessed by an Ajax call from:
+		
+		       savePost()   function   in the: msgWallDemo.js     file
+	***********************************************************************/
+	
 	
 	
 	$nUserId = 0; 
 	
+   /**********************************************************************
+       note: At the moment, I can't remember my reasoning for doing this...
+       
+       the value of this session variable is set in:   validateLogon.php
+       
+	**********************************************************************/
 	if (isset($_SESSION['logonUserId'])) {
 		$nUserId = (int)$_SESSION['logonUserId'];
 	} // end if
     	
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // for now, until I can figure out why I would do otherwise, a user id of zero (0)
+    // here will generate and error and Not save the post!
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    if ($nUserId == 0) {
+    	$sSubject = "Error: No session user id";
+    	$sEventDetails = $sSubject . '<p>';
+    	$sEventDetails ='You may want to check validateLogon.php for problems</p>';
+    	logEvent('postSaveError', $sSubject, $sEventDetails, 0);
+		echo '{' . "\n";
+			echo '"status":"error",' . "\n";	
+			echo '"reason":"2"' . "\n";		
+			outputLatestWallMessages($nUserId);
+			return; // do not continue any further
+		echo '}';
+    } // end if ($nUserId == 0)
+    
 	$nTmpMsgId = (int)$_POST["tmpMsgId"];
 	$sPostContent = $_POST["postContent"];
 	$nParentMsgId = (int)$_POST["parentMsgId"];

@@ -196,7 +196,7 @@
     	
     	// got this far? then hash code matched and is good to go
     	
-    	unset($_SESSION['logonHashCode']); // reset so it can't be reused!
+    	unset($_SESSION['logonHashCode']); // reset so the hash can't be reused!
     	
     	return true; // hash code matched!  return true!
     } // end of function isValidLogonHash()

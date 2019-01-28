@@ -60,7 +60,7 @@
 		<div id="pgHdr">
 			<a href="./"><img src="./touch-icon-228x228.png<?= $uniqueParam ?>" id="msgWallLogo" border="0"></a>
 			<div id="siteTitle"><div style="position:relative;left:0;top:0;width:100%;">
-			Orville Chomer's Message Wall Demo (PHP/mySQL)
+			Orville Chomer's Message Wall Demo (PHP/mySQL) v 1.0
 			<div id="wallInfo1">abc</div>
 			
 			</div> <!-- pos:rel -->
@@ -176,7 +176,7 @@
 				<span id="lblLogon" class="hdr1">Please Log In...</span>
 				
 				<span id="lblEmailAdr">Email Address:</span>
-				<input id="logonEmailAdr" 
+				<input id="logonEmailAdr" type="text"
 				       maxlength="200"
 				       onkeyup="checkLogonInput(EMAIL_INPUT,false)"
 				       onblur="checkLogonInput(EMAIL_INPUT,true)">
@@ -190,7 +190,7 @@
 				
 			
 				<button title="click to cancel logon"
-				 onclick="closeLogonPanel()"
+				 onclick="cancelLogonPanel()"
 				 class="cancelBtn cancelBtnLogon">Cancel</button>
 			
 				<button id="btnSignIn" disabled
@@ -210,30 +210,35 @@
 				<span id="lblInvitationCode">Invitation Code:</span>
 				<input id="invCode" 
 				       maxlength="40"
+				       type="text"
 				       onkeyup="checkSignUpInput(INVCODE_INPUT,false)"
 				       onblur="checkSignUpInput(INVCODE_INPUT,true)">
 				
 				<span id="lblEmailAdr2">Email Address:</span>
 				<input id="logonEmailAdr2" 
 				       maxlength="200"
+				       type="text"
 				       onkeyup="checkSignUpInput(EMAIL_INPUT,false)"
 				       onblur="checkSignUpInput(EMAIL_INPUT,true)">
 				
 				<span id="lblEmailAdr2c">Confirm Email:</span>
 				<input id="logonEmailAdr2_confirm" 
 				       maxlength="200"
+				       type="text"
 				       onkeyup="checkSignUpInput(EMAIL_INPUT2,false)"
 				       onblur="checkSignUpInput(EMAIL_INPUT2,true)">
 				
 				<span id="lblUsrFirstName">First Name:</span>
 				<input id="usrFirstName" 
 				       maxlength="60"
+				       type="text"
 				       onkeyup="checkSignUpInput(FIRSTNAME_INPUT,false)"
 				       onblur="checkSignUpInput(FIRSTNAME_INPUT,true)">
 				
 				<span id="lblUsrLastName">Last Name:</span>
 				<input id="usrLastName" 
 				       maxlength="60"
+				       type="text"
 				       onkeyup="checkSignUpInput(LASTNAME_INPUT,false)"
 				       onblur="checkSignUpInput(LASTNAME_INPUT,true)">
 				
@@ -251,7 +256,7 @@
 				      onblur="checkSignUpInput(PWD_INPUT2,true)">
 				
 				<button title="click to cancel logon"
-				 onclick="closeLogonPanel()"
+				 onclick="cancelLogonPanel()"
 				 class="cancelBtn cancelBtnLogon">Cancel</button>
 				 
 				 <div id="signUpMsg"></div>

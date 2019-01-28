@@ -80,6 +80,7 @@
    
    Button Related Selectors:
    =========================
+    button
     .cancelBtn
     .cancelBtnLogon   
     .genericBtn
@@ -205,6 +206,10 @@ body {
 	font-family:Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
+button {
+	overflow:hidden;
+	
+}
 
 .cancelBtn {
 	background-color:#E9EBEE;
@@ -391,7 +396,15 @@ body {
 }
 
 
+input[type=password] {
+	height:24px;
+	padding:3px;
+}
 
+input[type=text] {
+	height:24px;
+	padding:3px;
+}
 
 
 #invCode {
@@ -1116,7 +1129,8 @@ ul.postReplies {
 	width:38px;
 	border:solid silver 1px;
 	border-radius:19px;
-	
+	margin-left:4px;
+	margin-top:4px;
 }
 
 

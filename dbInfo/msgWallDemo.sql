@@ -3,24 +3,16 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 31, 2018 at 11:15 AM
+-- Generation Time: Jan 28, 2019 at 04:51 PM
 -- Server version: 5.6.38
 -- PHP Version: 7.2.1
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
 --
 -- Database: `msgWallDemo`
 --
-CREATE DATABASE IF NOT EXISTS `msgWallDemo` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `msgWallDemo`;
 
 -- --------------------------------------------------------
 
@@ -36,7 +28,23 @@ CREATE TABLE `eventLog` (
   `eventTimestamp` datetime NOT NULL,
   `userId` int(11) NOT NULL,
   `ipAddress` varchar(20) NOT NULL,
-  `alertLevel` int(11) NOT NULL
+  `alertLevel` int(11) NOT NULL,
+  `phpSessionId` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `invitationCodes`
+--
+
+CREATE TABLE `invitationCodes` (
+  `invitationCodeId` int(11) NOT NULL,
+  `invitationCode` varchar(50) NOT NULL,
+  `codeDesc` tinytext NOT NULL,
+  `usesLeft` int(11) NOT NULL,
+  `startDate` datetime NOT NULL,
+  `endDate` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -105,6 +113,7 @@ CREATE TABLE `wallMessages` (
   `msgTimestamp` datetime NOT NULL,
   `msgContent` text NOT NULL,
   `parentMsgId` int(11) NOT NULL,
+  `topLevelMsgId` int(11) NOT NULL,
   `likeCount` int(11) NOT NULL,
   `commentCount` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -118,6 +127,12 @@ CREATE TABLE `wallMessages` (
 --
 ALTER TABLE `eventLog`
   ADD PRIMARY KEY (`eventLogId`);
+
+--
+-- Indexes for table `invitationCodes`
+--
+ALTER TABLE `invitationCodes`
+  ADD PRIMARY KEY (`invitationCodeId`);
 
 --
 -- Indexes for table `msgUser`
@@ -151,13 +166,19 @@ ALTER TABLE `wallMessages`
 -- AUTO_INCREMENT for table `eventLog`
 --
 ALTER TABLE `eventLog`
-  MODIFY `eventLogId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
+  MODIFY `eventLogId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=209;
+
+--
+-- AUTO_INCREMENT for table `invitationCodes`
+--
+ALTER TABLE `invitationCodes`
+  MODIFY `invitationCodeId` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `msgUser`
 --
 ALTER TABLE `msgUser`
-  MODIFY `msgUserId` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `msgUserId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -175,8 +196,4 @@ ALTER TABLE `userUsers`
 -- AUTO_INCREMENT for table `wallMessages`
 --
 ALTER TABLE `wallMessages`
-  MODIFY `msgId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+  MODIFY `msgId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;

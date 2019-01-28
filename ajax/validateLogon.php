@@ -1,10 +1,19 @@
 <?php
 	require_once '../pdo_connect.php';
 	require_once './getWallMessages.php';
-/*
-   
- */
 
+/*******************************************************************************
+   
+   Takes values posted and verifies if valid 
+   logon credentials were provided.
+   
+   Called from:
+   
+      validateLogon()   function      in msgWallDemo.js
+   
+ *******************************************************************************/
+
+    // the function:    isValidLogonHash()  resides in:   pdo_connect.php
 	if (!isValidLogonHash()) {
 		echo '{' . "\n";
 		echo '"status":"fail",' . "\n";
@@ -16,8 +25,8 @@
 	
 	$sEmailAdr = $_POST["emailAdr"];
 	$sPassword = $_POST["pwd"];
-	$sLogonHashCode = $_POST["logonHashCode"];
 	
+	// clear out any possible previous values (just in case):
 	$_SESSION["logonUserId"] = 0;
 	$_SESSION["firstName"] = "";
 	$_SESSION["lastName"] = "";
@@ -38,7 +47,6 @@
 	//echo  $sql;
 	
 	$stmt = $db->prepare($sql);
-//	$stmt->bindParam(':regTaskId', $regTaskId, PDO::PARAM_INT);
 	$stmt->bindParam(':emailAdr', $sEmailAdr);  	
 	$stmt->execute();
 	
@@ -94,6 +102,9 @@
 	$stmt2->bindParam(':userId', $nUserId, PDO::PARAM_INT);
 	$stmt2->execute();
 	
+	$_SESSION["logonUserId"] = $nUserId;
+	$_SESSION["firstName"] = $sFirstName;
+	$_SESSION["lastName"] = $sLastName;
 	
 	echo '{' . "\n";
 		echo '"status":"success",' . "\n";
@@ -104,11 +115,6 @@
 		outputLatestWallMessages($nUserId);
 	echo '}';
 	
-	unset($_SESSION['logonHashCode']);
-	
-	$_SESSION["logonUserId"] = $nUserId;
-	$_SESSION["firstName"] = $sFirstName;
-	$_SESSION["lastName"] = $sLastName;
 		
 	$sSubject = 'User: ';
 	$sSubject = $sSubject . $sEmailAdr . ' logged on Successfully';
