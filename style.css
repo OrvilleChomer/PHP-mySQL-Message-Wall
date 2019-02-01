@@ -357,6 +357,20 @@ button {
 }
 
 
+/*
+   see:  @keyframes highlightFadeout
+   note: sadly, @keyframes items do not show in dropdown list of selectors :(
+ */
+
+.highlightFadeoutAni {
+	animation-name: highlightFadeout;
+	animation-duration: 4s;
+	border-radius: 3px;
+	
+}
+
+
+
 
 .hr1 {
 	width:495px;
@@ -397,12 +411,12 @@ button {
 
 
 input[type=password] {
-	height:24px;
+	height:15px;
 	padding:3px;
 }
 
 input[type=text] {
-	height:24px;
+	height:15px;
 	padding:3px;
 }
 
@@ -415,6 +429,15 @@ input[type=text] {
 	font-size:12pt;
 	border:solid gray 1px;
 	border-radius: 3px;
+}
+
+
+/*
+   see:  highlightFadeoutAni  (which uses this @keyframes item)
+ */
+@keyframes highlightFadeout {
+  from {background-color: #ffe6cc;}
+  to {background-color: white;}
 }
 
 

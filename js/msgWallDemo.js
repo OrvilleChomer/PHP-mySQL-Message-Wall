@@ -44,6 +44,8 @@
 		app.displayIdNums = false; // used for debugging (set to true)
 		app.hdrHeight = 42;
 		app.idMapping = [];  // lookup maps temp id to final id
+		app.indentPixels = 73;
+		app.initialDataLoadCompleted = false;
 		app.lastWallMsgQry = "01/01/1900 01:22:00"; // fallback date
 		app.logonEmail = "";
 		app.logonHashCode = "";
@@ -586,7 +588,7 @@
 		post.hasParent = false;
 		post.indentLevel = 0;
 		post.repliesExpanded = false;
-		
+		post.updatingGui = true;
 		
 		if (typeof niParentMsgId === "number") {
 			if (niParentMsgId > 0) {
@@ -652,6 +654,7 @@
 
 		if (typeof nMsgId !== "number") {
 			alert("editComment() - problem! nMsgId="+nMsgId);
+			debugger;
 			return;
 		} // end if
 		
@@ -774,6 +777,7 @@
 		var sImgClass = "commentUsrImg2";
 		var usr;
 		var sPostedAt, sReply;
+		var sAniClass1;
 		
 		if (paramEquals(options, "break", true)) {
 			debugger;
@@ -782,6 +786,12 @@
 		for (n=0;n<nMax;n++) {
 			reply = post.repliesByIndex[n];  // can be a Comment or a Reply 
 			
+			sAniClass1 = "";
+			
+			if (reply.updatingGui) {
+				sAniClass1 = " class='highlightFadeoutAni'";
+			} // end if
+		
 			usr = app.usersById[reply.userId];
 			sPostedAt = getFormattedRelativeDateTime(reply.msgTimestamp);
 			
@@ -794,7 +804,7 @@
 				sImgClass = "replyUsrImg2";
 			} // end if
 			
-				s[s.length] = "<table>";
+				s[s.length] = "<table"+sAniClass1+">";
 				s[s.length] = "<tr valign='top'>";
 				s[s.length] = "<td >";
 				s[s.length] = "<img src="+Q+usr.userImagePath+Q+" class='"+sImgClass+"' border='0'>";
@@ -907,6 +917,8 @@
 			if (post.indentLevel > 1) {
 				s[s.length] = "</li>"; // commentMsgCntr
 			} // end if
+			
+			reply.updatingGui = false;
 		} // next n
 		
 		
@@ -924,7 +936,12 @@
 		var usr = app.usersById[post.userId];
 		var sBasicFormattedTimestamp = getFormattedDateTime(post.msgTimestamp);
 		var sPostedAt = getFormattedRelativeDateTime(post.msgTimestamp);
-
+        var sAniClass1 = "";
+		
+		
+		if (post.updatingGui) {
+			sAniClass1 = " highlightFadeoutAni";
+		} // end if
 		
 		s[s.length] = "<li class='liMsg'>";
 		
@@ -933,7 +950,7 @@
 		
 		// msgCntr is our white box
 		
-			s[s.length] = "<div class='msgCntr' ";
+			s[s.length] = "<div class='msgCntr"+sAniClass1+"' ";
 			
 			if (post.postHeight > 100) {
 		//		s[s.length] = "style="+Q+"height:"+post.postHeight+"px;"+Q;
@@ -1001,6 +1018,7 @@
 						s[s.length] = "</td>";
 						s[s.length] = "<td width='*'>";
 						s[s.length] = "<input id='newComment"+post.msgId+"' class='commentInput' ";
+						s[s.length] = " autocomplete='off' ";
 						s[s.length] = " onkeyup="+Q+"editComment(this,"+post.msgId+")"+Q+" ";
 						s[s.length] = " onpaste="+Q+"editComment(this,"+post.msgId+")"+Q+" ";
 						s[s.length] = " placeholder='Write a comment...' ";
@@ -1028,8 +1046,11 @@
 			s[s.length] = "</div>";  // msgCntr class
 		s[s.length] = "</li>"; // liMsg class
 		
+		post.updatingGui = false;
+		
 		return s.join("");
 	} // end of function genWallPostMarkup()
+	
 	
 	
 	
@@ -1107,13 +1128,15 @@
 				el = $("#"+sId)[0];
 				if (typeof el === "undefined") {
 					alert("problem - getDomEl() - 2 - "+sId);
+					debugger;
 				} // end if
 			} else {
 				alert("problem - getDomEl()");
+				debugger;
 			} // end if/else
 		} // end if
 		
-		return el;
+		return el;debugger;
 	} // end of function getDomEl()
 	
 	
@@ -1532,7 +1555,7 @@
 		
 		s[s.length] = "<table cellpadding=0 cellspacing=0 width='100%'><tr>";
 		s[s.length] = "<td align='left' width='*' nowrap ";
-		s[s.length] = "id='likeLst1-"+post.msgId+"' ";
+		s[s.length] = "id='likeLst1-"+(post.msgId)+"' ";
 		s[s.length] = ">";
 		
 		if (post.likeCount > 0) {			
@@ -1547,6 +1570,8 @@
 		if (post.repliesByIndex.length > 0) {
 			s[s.length] = post.repliesByIndex.length;
 			s[s.length] = " comments";
+		} else {
+			s[s.length] = "&nbsp;";
 		} // end if
 			
 		s[s.length] = "</td></tr></table>";
@@ -1581,6 +1606,8 @@
 						
 			processPostsAndUsers(obj);
 
+			app.initialDataLoadCompleted = true;
+			
 			if (typeof bPageStartup !== "undefined") {
 				if (bPageStartup) {
 					if (app.currentUserId > 0) {
@@ -1816,16 +1843,22 @@
    	  toggle "like" flag on msg for the current user
     ******************************************************************************/	
 	function likeUnlike(nMsgId) {
-		var likeLnk = $("#likeLnk"+nMsgId)[0];
-		var msg = app.postsById[nMsgId];
+		var likeLnk = getDomEl("likeLnk", nMsgId);  
+		var msg = app.postsById[getActualId(nMsgId)];
 		var sInfo = "You need to be logged in before you can un/like a message.";
 		var wrk = makeAJAXWorkObj();
 		var sURL = "./ajax/likeUnlike.php";
 		var likeLst1;
 		
+		if (typeof msg === "undefined") {
+			alert("Problem in likeUnlike() function.\n msg is undefined.\n nMsgId="+nMsgId);
+			debugger;
+			return;
+		} // end if
+		
 		if (app.currentUserId === 0) {
 			app.afterLogonCmd = "like";
-			app.afterLogonMsgId = nMsgId;
+			app.afterLogonMsgId = getActualId(nMsgId);
 			showLogonPanel(sInfo);  // got to be logged in first!
 			return;
 		} // end if
@@ -1854,7 +1887,7 @@
 		
 		
 		if (msg.parentMsgId === 0) {
-			likeLst1 = $("#likeLst1-"+nMsgId)[0];
+			likeLst1 = $("#likeLst1-"+getActualId(nMsgId))[0];
 			likeLst1.innerHTML = getLikedList1(msg);
 		} // end if
 		
@@ -1862,12 +1895,13 @@
 		wrk.addPostFieldValueForInt("excludeUserId", app.currentUserId);
 		wrk.addPostFieldValueForString("lastQuery", app.lastWallMsgQry);
 		wrk.addPostFieldValueForInt("userId", app.currentUserId);
-		wrk.addPostFieldValueForInt("msgId", nMsgId);
+		wrk.addPostFieldValueForInt("msgId", getActualId(nMsgId));
 						
 		wrk.nextDoPostToServerAndThenDo(function(sResult) {
 			var obj = jsonParse(sResult);
 			
 			processMsgUserDataItem(obj.msgUsrObj);
+			processPostsAndUsers(obj); // pick up any other user's changes that might have happened
 		});	 // end of call-back block	
 		
 	} // end of function likeUnlike()
@@ -2027,9 +2061,14 @@
 			
 			post.repliesExpanded = false;
 			post.youLiked = false;
+			post.updatingGui = false;
 			
 			if (typeof post.msgTimestamp === "string") {
 				post.msgTimestamp = new Date(post.msgTimestamp);
+			} // end if
+			
+			if (app.initialDataLoadCompleted) {
+				post.updatingGui = true;
 			} // end if
 			
 			if (typeof post.repliesByIndex === "undefined") {
@@ -2042,6 +2081,8 @@
 			
 			if (typeof app.postsById[post.msgId] === "undefined") {
 				app.postsByIndex[app.postsByIndex.length] = post;
+				
+				
 				
 				if (post.parentMsgId === 0) {
 					app.topLevelPostsByIndex[app.topLevelPostsByIndex.length] = post;
@@ -2081,7 +2122,7 @@
 	*******************************************************************/
 	function processPostsAndUsers(obj) {
 	
-		if (typeof obj.lastChecked !== "") {
+		if (typeof obj.lastChecked !== "undefined") {
 			app.lastWallMsgQry = obj.lastChecked;
 		} // end if
 		
@@ -2329,7 +2370,7 @@
 			
 			if (obj.status === "postSuccessful") {
 				// put this (if) condition below in with the idea of using this save
-				// function to update Existing posts not just create new ones
+				// function to {update} Existing posts not just create new ones
 				if (post.msgId < 0) {
 					post.tmpId = post.msgId;
 					setActualId(post.msgId, obj.newMsgId);  // needs to be done BEFORE assigning post.msgId new value!
@@ -2344,11 +2385,12 @@
 				} // end if
 				
 				if (post.indentLevel === 1) {
-					likeLst1 = $("#likeLst1-"+nMsgId)[0];
-					likeLst1.innerHTML = getLikedList1(post);
+					likeLst1 = getDomEl("likeLst1-", parentMsg.msgId); 
+					likeLst1.innerHTML = getLikedList1(parentMsg);
 				} // end if
 			} else {
 				alert("Problem!");
+				debugger;
 			} // end if/else
 			
 		});	 // end of call-back block	
@@ -2559,6 +2601,7 @@
 	
 	
    /***************************************************************
+      called when user clicks [Sign In] button.
 	***************************************************************/
 	function signIn() {
 		validateLogon();
@@ -2677,12 +2720,17 @@
    	   
 	****************************************************************/ 		
 	function startAReplyTo(nMsgId) {
-		var txtReply = $("#txtReply"+nMsgId)[0];
+		var txtReply;
 		var postReplies;
 		var li;
 		var s = [];
 		var usr;
 		var sUserImagePath;
+		var msg,nWidth, nIndent, sStyle;
+		var Q = '"';
+		
+		nMsgId = getActualId(nMsgId);
+		txtReply = $("#txtReply"+nMsgId)[0];
 		
 		sUserImagePath = app.defaultUserImagePath;
 		
@@ -2694,12 +2742,29 @@
 		if (typeof txtReply === "undefined") {
 			postReplies = $("#postReplies"+nMsgId)[0];
 			li = document.createElement("li");
+		
+			msg = app.postsById[nMsgId];
 			
+			nIndent = app.indentPixels + 28;
+			
+			if (msg.indentLevel > 1) {
+				nIndent = nIndent + ((app.indentPixels - 24) * (msg.indentLevel-1))
+			} // end if
+			
+			nWidth = app.panelWidth - nIndent;
+			
+			if (nWidth < 80) {
+				nWidth = 80;
+			} // end if
+			
+			sStyle = " style="+Q+"width:"+(nWidth)+"px;"+Q+" ";
 			s[s.length] = "<table><tr>";
 			s[s.length] = "<td>";
 			s[s.length] = "<img src="+Q+sUserImagePath+Q+"' class='replyUsrImg'>";
 			s[s.length] = "</td>";
 			s[s.length] = "<td><input id='txtReply"+nMsgId+"' ";
+			s[s.length] = sStyle;
+			s[s.length] = " autocomplete='off' ";
 			s[s.length] = "class='txtReply' ";
 			s[s.length] = " onkeyup="+Q+"editComment(this,"+nMsgId+")"+Q+" ";
 			s[s.length] = " onpaste="+Q+"editComment(this,"+nMsgId+")"+Q+" ";
@@ -2711,9 +2776,21 @@
 			postReplies.appendChild(li);
 		} // end if
 		
-		txtReply.focus();
+		setTimeout("startAReplyTo2("+nMsgId+")",10);
 		
 	} // end of function startAReplyTo()
+	
+	
+   /****************************************************************
+   	   
+	****************************************************************/ 	
+	function startAReplyTo2(nMsgId) {
+		var txtReply = $("#txtReply"+nMsgId)[0];
+		
+		txtReply.focus();
+	} // end of function startAReplyTo(nMsgId) 
+	
+	
 	
 	
 	

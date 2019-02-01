@@ -121,7 +121,7 @@
 									<table><tr><td><img 
 									src="./userImages/noPic.png<?= $uniqueParam ?>" 
 									         class="userImg1" id="postUsrImg"></td>
-									<td><input id="newPost" 
+									<td><input id="newPost" autocomplete="off"
 									onkeyup="checkPostEntry()"
 									onpaste="checkPostEntry()"
 									placeholder="What's on your mind?"/></td>
